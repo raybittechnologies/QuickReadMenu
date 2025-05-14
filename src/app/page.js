@@ -1,103 +1,200 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
+import Navbar from "./components/Navbar/page";
+import MenuPreview from "./components/MenuPreview/page";
+import CountryLanguageSelect from "./countryLanguage/page";
+import BusinessSetup from "./Select_Business/page";
+import BusinessSearch from "./BusinessLocation/page";
+import AddressForm from "./AddressForm/page";
+import LogoUpload from "./logoUpload/page";
+
+const steps = ["Business Type", "Add Items", "Customize Menu", "Generate QR"];
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [step, setStep] = useState(1);
+  const [selectedType, setSelectedType] = useState(null);
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [selectedLanguage, setSelectedLanguage] = useState(null);
+  const [selectedBusiness, setSelectedBusiness] = useState(null);
+  const [businessDetails, setBusinessDetails] = useState(null);
+  const [logo, setLogo] = useState(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const defaultLogo =
+    "https://img.freepik.com/free-vector/vintage-restaurant-menu_23-2147491098.jpg?ga=GA1.1.364166860.1747116538&semt=ais_hybrid&w=740";
+  useEffect(() => {
+    const savedStep = parseInt(localStorage.getItem("step"));
+    const type = localStorage.getItem("selectedType");
+    const country = localStorage.getItem("selectedCountry");
+    const language = localStorage.getItem("selectedLanguage");
+    const business = localStorage.getItem("selectedBusiness");
+    const details = localStorage.getItem("businessDetails");
+    const storedLogo = localStorage.getItem("customLogo");
+
+    if (savedStep) setStep(savedStep);
+    if (type) setSelectedType(type);
+    if (country) setSelectedCountry(country);
+    if (language) setSelectedLanguage(language);
+    if (business) setSelectedBusiness(JSON.parse(business));
+    if (details) setBusinessDetails(JSON.parse(details));
+    if (storedLogo) {
+      setLogo(storedLogo);
+    } else {
+      setLogo(defaultLogo);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("step", step);
+    localStorage.setItem("selectedType", selectedType || "");
+    localStorage.setItem("selectedCountry", selectedCountry || "");
+    localStorage.setItem("selectedLanguage", selectedLanguage || "");
+    localStorage.setItem(
+      "selectedBusiness",
+      JSON.stringify(selectedBusiness || {})
+    );
+    localStorage.setItem(
+      "businessDetails",
+      JSON.stringify(businessDetails || {})
+    );
+  }, [
+    step,
+    selectedType,
+    selectedCountry,
+    selectedLanguage,
+    selectedBusiness,
+    businessDetails,
+  ]);
+
+  const goToNext = () => setStep((prev) => prev + 1);
+  const goToPrev = () => {
+    setStep((prev) => {
+      const newStep = Math.max(prev - 1, 1);
+
+      switch (prev) {
+        case 2:
+          setSelectedType(null);
+          break;
+        case 3:
+          setSelectedCountry(null);
+          setSelectedLanguage(null);
+          break;
+        case 4:
+          setSelectedBusiness(null);
+          break;
+        case 5:
+          setBusinessDetails(null);
+          break;
+        case 6:
+          setLogo(defaultLogo);
+          localStorage.removeItem("customLogo");
+          break;
+        default:
+          break;
+      }
+
+      return newStep;
+    });
+  };
+
+  return (
+    <>
+      <Navbar />
+
+      <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="flex justify-between items-center mb-8">
+          {steps.map((label, index) => (
+            <div
+              key={index}
+              className="flex-1 flex flex-col items-center relative"
+            >
+              <div
+                className={`w-8 h-8 flex items-center justify-center rounded-full text-white font-semibold ${
+                  index + 1 <= step ? "bg-blue-600" : "bg-gray-300"
+                }`}
+              >
+                {index + 1}
+              </div>
+              <span className="text-xs text-center mt-1">{label}</span>
+              {index < steps.length - 1 && (
+                <div className="absolute top-4 left-full w-full h-0.5 bg-gray-300 z-0" />
+              )}
+            </div>
+          ))}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+      </div>
+
+      <div className="flex max-w-7xl mx-auto px-6 pb-12 gap-10">
+        <div className="flex-1">
+          {step === 1 && (
+            <BusinessSetup
+              selectedType={selectedType}
+              setSelectedType={(type) => {
+                setSelectedType(type);
+                goToNext();
+              }}
+            />
+          )}
+
+          {step === 2 && (
+            <CountryLanguageSelect
+              selectedCountry={selectedCountry}
+              setSelectedCountry={setSelectedCountry}
+              selectedLanguage={selectedLanguage}
+              setSelectedLanguage={setSelectedLanguage}
+              onNext={goToNext}
+            />
+          )}
+
+          {step === 3 && (
+            <BusinessSearch
+              onSelect={(business) => {
+                setSelectedBusiness(business);
+                goToNext();
+              }}
+            />
+          )}
+
+          {step === 4 && selectedBusiness && (
+            <AddressForm
+              business={selectedBusiness}
+              onComplete={(details) => {
+                setBusinessDetails(details);
+                setStep(5);
+              }}
+            />
+          )}
+          {step === 5 && (
+            <LogoUpload
+              logo={logo}
+              setLogo={setLogo}
+              onComplete={() => setStep(6)}
+            />
+          )}
+        </div>
+
+        <div className="w-[360px] hidden lg:block">
+          <MenuPreview
+            businessType={selectedType}
+            country={selectedCountry}
+            language={selectedLanguage}
+            businessInfo={selectedBusiness}
+            footerDetails={businessDetails}
+            logo={logo}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        </div>
+      </div>
+
+      {step > 1 && (
+        <div className="max-w-7xl mx-auto px-6 pb-8">
+          <button
+            onClick={goToPrev}
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Back
+          </button>
+        </div>
+      )}
+    </>
   );
 }

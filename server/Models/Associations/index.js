@@ -4,6 +4,8 @@ module.exports = (db) => {
     foreignKey: { name: "business_id" },
   });
 
+  db.Business.hasMany(db.Slugs, { foreignKey: { name: "buisness_id" } });
+
   //Categories
   db.Categories.belongsTo(db.Business, {
     foreignKey: { name: "business_id" },
@@ -17,4 +19,7 @@ module.exports = (db) => {
   db.Items.belongsTo(db.Categories, {
     foreignKey: { name: "category_id" },
   });
+
+  //Slugs
+  db.Slugs.belongsTo(db.Business, { foreignKey: { name: "buisness_id" } });
 };

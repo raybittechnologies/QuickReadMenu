@@ -22,6 +22,7 @@ export default function Home() {
 
   const defaultLogo =
     "https://img.freepik.com/free-vector/vintage-restaurant-menu_23-2147491098.jpg?ga=GA1.1.364166860.1747116538&semt=ais_hybrid&w=740";
+
   useEffect(() => {
     const savedStep = parseInt(localStorage.getItem("step"));
     const type = localStorage.getItem("selectedType");
@@ -45,6 +46,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    localStorage.setItem({});
     localStorage.setItem("step", step);
     localStorage.setItem("selectedType", selectedType || "");
     localStorage.setItem("selectedCountry", selectedCountry || "");

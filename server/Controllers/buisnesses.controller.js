@@ -1,11 +1,16 @@
 const { catchAsync } = require("../Utils/catchAsync");
 
-const { Business, Categories, Items } = require("../Models/index");
+const { Business, Categories, Items, Slugs } = require("../Models/index");
+const { default: slugify } = require("slugify");
 
 // Create a new Business
 exports.createBusiness = catchAsync(async (req, res, next) => {
   req.body = { ...req.body, ...req.uploadedFiles };
   const newBuisness = await Business.create(req.body);
+
+  const buisnessSlug = slugify(req.body.buisnessName);
+  await Slugs.create({ slug: buisnessSlug, buisness_id: newBuisness.id });
+
   res.status(201).json({ status: "success", data: newBuisness });
 });
 

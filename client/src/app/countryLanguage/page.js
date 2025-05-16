@@ -14,28 +14,23 @@ const CountryLanguageSelect = ({
   const [countries, setCountries] = useState([]);
   const [languages, setLanguages] = useState([]);
 
-  const [currentCountry, setCurrentCountry] = useState("");
-  const [currentLanguage, setCurrentLanguage] = useState("");
-
   const handleAddBusiness = (e) => {
     addBusiness({ country: e.target.value });
   };
 
   useEffect(() => {
-    // Fetch list of countries on mount
     axios.get("https://restcountries.com/v3.1/all").then((res) => {
       const countryList = res.data
         .map((country) => ({
           name: country.name.common,
           code: country.cca2,
         }))
-        .sort((a, b) => a.name.localeCompare(b.name)); // Optional: sort alphabetically
+        .sort((a, b) => a.name.localeCompare(b.name));
       setCountries(countryList);
     });
   }, []);
 
   useEffect(() => {
-    // Reset language if country changes
     setLanguages([]);
     setSelectedLanguage("");
 

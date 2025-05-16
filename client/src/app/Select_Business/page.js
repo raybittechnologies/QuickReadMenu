@@ -1,14 +1,22 @@
-import { useState } from "react";
 import { addBusiness } from "../utils/api";
+import { bannerImages } from "../utils/constants";
 
-const BusinessSetup = ({ selectedType, setSelectedType }) => {
+const BusinessSetup = ({ selectedType, setSelectedType, setBanner }) => {
   // const [buisnessType, setBusinessType] = useState("");
   const handleAddBusiness = (e) => {
-    console.log(e.target.value);
-    setSelectedType(e.target.value);
-    // if (selectedType === "") return;
-    addBusiness({ businesstype: e.target.value });
+    const value = e.target.value;
+    console.log(value);
+    setSelectedType(value);
+    addBusiness({ businesstype: value });
+
+    const defaultBanner = bannerImages[value];
+    if (defaultBanner) {
+      setBanner(defaultBanner);
+      localStorage.setItem("customBanner", defaultBanner);
+      localStorage.setItem("customBannerUploaded", "false");
+    }
   };
+
   const businessTypes = [
     { label: "Restaurant", value: "restaurant" },
     { label: "Café", value: "cafe" },
@@ -28,7 +36,7 @@ const BusinessSetup = ({ selectedType, setSelectedType }) => {
             key={type.value}
             onClick={handleAddBusiness}
             value={type.value}
-            className={` rounded-lg p-6 text-center transition-all duration-150 shadow-blue-300/50 shadow-md ${
+            className={` rounded-lg p-6 text-center transition-all duration-150 shadow-[2px_2px_14px_2px_#55c2c350] hover:scale-101 ${
               selectedType === type.value
                 ? "bg-blue-100 border-blue-600 text-blue-800 font-semibold"
                 : "bg-white border-gray-300 hover:border-blue-500"

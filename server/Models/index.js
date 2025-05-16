@@ -13,7 +13,7 @@ const sequelize = new Sequelize(
 
 const db = {};
 const associations = require("./Associations/index");
-
+db.sequelize = sequelize;
 db.Business = require("./businessesModel")(sequelize, DataTypes);
 db.Categories = require("./categories.model")(sequelize, DataTypes);
 db.Items = require("./items.model")(sequelize, DataTypes);

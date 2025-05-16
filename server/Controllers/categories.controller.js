@@ -13,6 +13,17 @@ exports.getAllCategories = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "success", data: categories });
 });
 
+//Get all categories of a restaurant
+exports.getAllCategoriesRestaurant = catchAsync(async (req, res, next) => {
+  const categories = await Categories.findAll({
+    where: { business_id: req.params.id },
+  });
+
+  if (!categories) return res.status(206).json({ data: [] });
+
+  res.status(200).json({ count: categories.length, data: categories });
+});
+
 // Get a single category by ID
 exports.getCategoryById = catchAsync(async (req, res, next) => {
   const category = await Categories.findByPk(req.params.id);

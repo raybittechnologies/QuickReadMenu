@@ -4,6 +4,9 @@ const { catchAsync } = require("../Utils/catchAsync");
 // Create a new item
 exports.createItem = catchAsync(async (req, res, next) => {
   const item = await Items.create(req.body);
+
+  const category = await item.getCategory();
+  console.log(category);
   res.status(201).json({ status: "success", data: item });
 });
 

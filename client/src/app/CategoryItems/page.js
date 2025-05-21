@@ -7,14 +7,17 @@ export default function CategoryItemsManager({
   categories,
   setCategories,
   onNext,
+  createdItems,
+  setCreatedItems,
 }) {
   const router = useRouter();
+
   const [selectedCategory, setSelectedCategory] = useState("");
   const [itemName, setItemName] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [editIndex, setEditIndex] = useState(null);
-  const [createdItems, setCreatedItems] = useState({});
+
   const resetForm = () => {
     setItemName("");
     setPrice("");
@@ -44,6 +47,8 @@ export default function CategoryItemsManager({
     resetForm();
   };
 
+  console.log(createdItems);
+
   const handleEdit = (index) => {
     const cat = categories.find((c) => c.name === selectedCategory);
     const item = cat?.items?.[index];
@@ -69,7 +74,7 @@ export default function CategoryItemsManager({
     resetForm();
   };
 
-  useEffect(() => {}, [createdItems]);
+  // useEffect(() => {}, [createdItems]);
 
   useEffect(() => {
     categories.map((el) =>

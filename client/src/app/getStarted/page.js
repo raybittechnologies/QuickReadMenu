@@ -34,6 +34,7 @@ export default function Home() {
   const [businessDetails, setBusinessDetails] = useState(null);
   const [logo, setLogo] = useState(null);
   const [banner, setBanner] = useState(null);
+  const [createdItems, setCreatedItems] = useState({});
 
   const defaultLogo =
     "https://img.freepik.com/free-vector/vintage-restaurant-menu_23-2147491098.jpg?ga=GA1.1.364166860.1747116538&semt=ais_hybrid&w=740";
@@ -78,6 +79,7 @@ export default function Home() {
     if (logo) sessionStorage.setItem("customLogo", logo);
     if (banner) sessionStorage.setItem("customBanner", banner);
     sessionStorage.setItem("menuCategories", JSON.stringify(categories || []));
+    sessionStorage.setItem("items", JSON.stringify(createdItems));
   }, [
     step,
     selectedType,
@@ -88,6 +90,7 @@ export default function Home() {
     logo,
     banner,
     categories,
+    createdItems,
   ]);
 
   const goToNext = () => setStep((prev) => prev + 1);
@@ -128,6 +131,38 @@ export default function Home() {
 
       return newStep;
     });
+  };
+
+  const generate = () => {
+    const payload = {};
+    payload.type = sessionStorage.getItem("selectedType");
+    payload.country = sessionStorage.getItem("selectedCountry");
+    payload.language = sessionStorage.getItem("selectedLanguage");
+    payload.business = JSON.parse(sessionStorage.getItem("selectedBusiness"));
+    payload.details = JSON.parse(sessionStorage.getItem("businessDetails"));
+    payload.storedLogo = sessionStorage.getItem("customLogo");
+    payload.storedBanner = sessionStorage.getItem("customBanner");
+    payload.storedCategories = JSON.parse(
+      sessionStorage.getItem("menuCategories")
+    );
+    payload.items = JSON.parse(sessionStorage.getItem("items"));
+
+    const asliPayload = {};
+    asliPayload.businessName = payload.business.name;
+    asliPayload.businessType = payload.type;
+    asliPayload.country = payload.details.country;
+    asliPayload.language = payload.language;
+    asliPayload.address = payload.details.address;
+    asliPayload.add_city = payload.details.city;
+    asliPayload.add_country = payload.details.country;
+    asliPayload.add_zip = payload.details.pincode;
+    asliPayload.add_phone = "9906990600";
+    asliPayload.logo = payload.storedLogo;
+    asliPayload.banner = payload.storedBanner;
+    asliPayload.categories = payload.storedCategories;
+    asliPayload.items = payload.items;
+
+    console.log(asliPayload);
   };
 
   return (
@@ -232,7 +267,9 @@ export default function Home() {
             <CategoryItemsManager
               categories={categories}
               setCategories={setCategories}
-              onNext={goToNext}
+              onNext={generate}
+              createdItems={createdItems}
+              setCreatedItems={setCreatedItems}
             />
           )}
           {step > 1 && (

@@ -49,7 +49,9 @@ export default function createBusiness() {
 
       // Handle nested items object
       for (const category in asliPayload.items) {
+        console.log(category);
         asliPayload.items[category].forEach((item, index) => {
+          console.log(item);
           formData.append(`items[${category}][${index}][name]`, item.name);
           formData.append(`items[${category}][${index}][price]`, item.price);
           formData.append(

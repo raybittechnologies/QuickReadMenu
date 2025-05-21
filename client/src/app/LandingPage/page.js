@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages */
 "use client";
 import Link from "next/link";
 import Button from "../components/Button/page";

@@ -2,13 +2,19 @@
 
 import { use, useEffect, useState } from "react";
 
-export default function CategoryItemsManager({ categories, setCategories }) {
+export default function CategoryItemsManager({
+  categories,
+  setCategories,
+  onNext,
+  createdItems,
+  setCreatedItems,
+}) {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [itemName, setItemName] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [editIndex, setEditIndex] = useState(null);
-  const [createdItems, setCreatedItems] = useState({});
+
   const resetForm = () => {
     setItemName("");
     setPrice("");
@@ -17,7 +23,6 @@ export default function CategoryItemsManager({ categories, setCategories }) {
   };
 
   const updateItemsInCategory = () => {
-    console.log("rtrtrtrt");
     if (!itemName || !price) return;
 
     const newItem = {
@@ -38,6 +43,8 @@ export default function CategoryItemsManager({ categories, setCategories }) {
 
     resetForm();
   };
+
+  console.log(createdItems);
 
   const handleEdit = (index) => {
     const cat = categories.find((c) => c.name === selectedCategory);
@@ -64,7 +71,7 @@ export default function CategoryItemsManager({ categories, setCategories }) {
     resetForm();
   };
 
-  useEffect(() => {}, [createdItems]);
+  // useEffect(() => {}, [createdItems]);
 
   useEffect(() => {
     categories.map((el) =>
@@ -204,6 +211,14 @@ export default function CategoryItemsManager({ categories, setCategories }) {
             }
           </ul>
         </div>
+      )}
+      {selectedCategory && createdItems && (
+        <button
+          onClick={onNext}
+          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Continue
+        </button>
       )}
     </div>
   );

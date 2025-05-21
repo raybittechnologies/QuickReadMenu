@@ -138,11 +138,12 @@ exports.getMenuOnSlug = catchAsync(async (req, res, next) => {
     include: [
       {
         model: Business,
-        attributes: ["qrcode"],
+        attributes: ["qrcode", "logo", "banner", "businessName"],
         include: { model: Categories, include: { model: Items } },
       },
     ],
   });
 
-  const menu = myQrMenu.res.status(200).json({ status: "success", myQrMenu });
+  const menu = myQrMenu.buisness;
+  res.status(200).json({ status: "success", menu });
 });

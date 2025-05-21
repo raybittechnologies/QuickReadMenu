@@ -24,6 +24,7 @@ app.use(
       "http://localhost:3001",
       "http://localhost:5173",
       "https://rayapps.org",
+      "http://192.168.100.16:3000",
     ],
     credentials: true,
   })

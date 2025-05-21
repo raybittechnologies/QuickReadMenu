@@ -26,7 +26,7 @@ const steps = [
 
 export default function Home() {
   const [step, setStep] = useState(1);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState({});
   const [selectedType, setSelectedType] = useState(null);
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [selectedLanguage, setSelectedLanguage] = useState(null);

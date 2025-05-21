@@ -128,7 +128,7 @@ exports.googleCallback = catchAsync(async (req, res, next) => {
           email: user.email,
         });
 
-        return res.redirect(`${process.env.FE_URL}/agreement?token=${token}`);
+        return res.redirect(`${process.env.FE_URL}/createBusiness`);
       }
 
       await User.create({
@@ -140,7 +140,7 @@ exports.googleCallback = catchAsync(async (req, res, next) => {
         email: user.email,
       });
 
-      res.redirect(`${process.env.FE_URL}/agreement?token=${token}`);
+      res.redirect(`${process.env.FE_URL}/createBusiness`);
     }
   )(req, res, next);
 });

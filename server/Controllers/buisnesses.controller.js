@@ -11,20 +11,22 @@ exports.createBusiness = catchAsync(async (req, res, next) => {
   req.body = { ...req.body, ...req.uploadedFiles };
   let operation = true;
   let fileName;
+  console.log(req.body);
   const result = await sequelize.transaction(async (t) => {
-    const buisnessSlug = slugify(req.body.buisnessName);
-    fileName = `${Date.now()}-${buisnessSlug}`;
+    const businessSlug = slugify(req.body.businessName);
+    fileName = `${Date.now()}-${businessSlug}`;
     const location = path.join(
       __dirname,
       `../public/assets/qrcodes/${fileName}.png`
     );
 
     req.body.qrcode = `/qrcodes/${fileName}.png`;
+    req.body.user_id = "b5f9638b-5768-4a22-b36a-1533e3934d40";
     const newBuisness = await Business.create(req.body, { transaction: t });
 
     const qr = QRCode.toFile(
       `${location}`,
-      `${process.env.SERVER_URI}/${buisnessSlug}`,
+      `${process.env.SERVER_URI}/${businessSlug}`,
       {
         type: "png",
         color: {
@@ -43,11 +45,35 @@ exports.createBusiness = catchAsync(async (req, res, next) => {
     if (!operation) return;
 
     await Slugs.create(
-      { slug: `/${buisnessSlug}`, buisness_id: newBuisness.id },
+      { slug: `/${businessSlug}`, buisness_id: newBuisness.id },
       { transaction: t }
     );
 
-    return { newBuisness, buisnessSlug };
+    for (const categoryName of req.body.categories) {
+      const category = await Categories.create(
+        {
+          name: categoryName,
+          business_id: newBuisness.id,
+        },
+        { transaction: t }
+      );
+
+      const items = req.body.items[categoryName];
+
+      for (const item of items) {
+        await Items.create(
+          {
+            name: item.name,
+            price: item.price,
+            description: item.description,
+            category_id: category.id,
+          },
+          { transaction: t }
+        );
+      }
+    }
+
+    return { newBuisness, businessSlug };
   });
 
   if (!operation) return res.status(400).json({ status: "error" });
@@ -64,7 +90,17 @@ exports.getAllBusinesses = catchAsync(async (req, res, next) => {
 // Get a single Business by ID
 exports.getBusinessById = catchAsync(async (req, res, next) => {
   const single = await Business.findByPk(req.params.id);
-  if (!Business) {
+  if (!single) {
+    return res
+      .status(404)
+      .json({ status: "fail", message: "Business not found" });
+  }
+  res.status(200).json({ status: "success", data: single });
+});
+
+exports.getMyBusiness = catchAsync(async (req, res, next) => {
+  const single = await Business.findOne({ where: { user_id: req.user.id } });
+  if (!single) {
     return res
       .status(404)
       .json({ status: "fail", message: "Business not found" });
@@ -74,7 +110,7 @@ exports.getBusinessById = catchAsync(async (req, res, next) => {
 
 // Update a Business
 exports.updateBusiness = catchAsync(async (req, res, next) => {
-  const update = await Business.findByPk(req.params.id);
+  const update = await Business.findOne({ where: { user_id: req.user.id } });
 
   if (!update) {
     return res

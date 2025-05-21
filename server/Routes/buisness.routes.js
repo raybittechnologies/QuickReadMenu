@@ -11,6 +11,7 @@ const {
   getMyQr,
   getMenuOnSlug,
 } = require("../Controllers/buisnesses.controller");
+const { protect } = require("../Controllers/auth.controller");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -38,6 +39,8 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage });
+
+// BusinessRouter.use(protect);
 
 BusinessRouter.route("/")
   .post(

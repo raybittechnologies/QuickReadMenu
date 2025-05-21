@@ -6,6 +6,13 @@ module.exports = (db) => {
 
   db.Business.hasMany(db.Slugs, { foreignKey: { name: "buisness_id" } });
 
+  db.User.hasMany(db.Business, {
+    foreignKey: { name: "user_id" },
+  });
+  db.Business.belongsTo(db.User, {
+    foreignKey: { name: "user_id" },
+  });
+
   //Categories
   db.Categories.belongsTo(db.Business, {
     foreignKey: { name: "business_id" },

@@ -42,6 +42,10 @@ module.exports = (sequelize, DataTypes) => {
     qrcode: {
       type: DataTypes.STRING,
     },
+    user_id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+    },
   });
 
   return Business;

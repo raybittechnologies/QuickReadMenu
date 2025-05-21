@@ -4,12 +4,27 @@ const app = express();
 const cookieParser = require("cookie-parser");
 const path = require("path");
 const cors = require("cors");
+const session = require("express-session");
+const passport = require("passport");
+const { initializeStratigies } = require("./Utils/passport");
+
 const { sendErrorRes } = require("./Controllers/error.controller");
 
 // const { initWebSocket } = require("./sockets/socket");
 
 const server = require("http").createServer(app);
 // initWebSocket(server);
+
+app.use(
+  session({
+    secret: "your-secret-key",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
+initializeStratigies(passport);
 
 app.use(express.json());
 app.use(morgan("dev"));
@@ -34,6 +49,7 @@ app.options("*", cors());
 
 app.use(express.static(path.join(__dirname, "public/assets")));
 
+app.use("/api/v1/auth", require("./Routes/auth.routes"));
 app.use("/api/v1/businesses", require("./Routes/buisness.routes"));
 app.use("/api/v1/categories", require("./Routes/category.routes"));
 app.use("/api/v1/items", require("./Routes/items.routes"));

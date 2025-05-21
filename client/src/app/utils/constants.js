@@ -15,3 +15,5 @@ export const defaultLogo =
 
 export const fallbackBanner =
   "https://images.unsplash.com/photo-1513757378314-e46255f6ed16?w=500&auto=format&fit=crop&q=60";
+
+export const BASE_URI = "http://192.168.100.14:5050";

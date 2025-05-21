@@ -14,3 +14,5 @@ export const addBusiness = async (data) =>
 
 export const getQrMenu = async (slug) =>
   await api.get(`${BASE_URI}/businesses/qr/${slug}`);
+
+export const register = async (formData) => await api.post("/businesses", formData);

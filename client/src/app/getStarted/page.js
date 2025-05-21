@@ -232,6 +232,7 @@ export default function Home() {
             <CategoryItemsManager
               categories={categories}
               setCategories={setCategories}
+              onNext={goToNext}
             />
           )}
           {step > 1 && (

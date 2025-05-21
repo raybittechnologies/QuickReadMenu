@@ -10,6 +10,10 @@ export default function SignupFormDemo() {
     e.preventDefault();
     console.log("Form submitted");
   };
+
+  const googleLogin = () => {
+    window.location.href = "http://localhost:5050/api/v1/auth/google/signup";
+  };
   return (
     <div className="shadow-input mt-20 mx-auto max-w-md rounded-none bg-[#6220fb] p-4 md:rounded-2xl md:p-8">
       <h2 className="text-center text-xl font-bold text-white">
@@ -37,18 +41,18 @@ export default function SignupFormDemo() {
         </button>
 
         <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent dark:via-neutral-700" />
-
-        <div className="flex flex-col space-y-4">
-          <button
-            className="group/btn shadow-input relative flex h-10 w-full items-center justify-center space-x-2 rounded-md bg-white px-4 font-medium text-black"
-            type="submit"
-          >
-            <IconBrandGoogle className="h-4 w-4 text-black" />
-            <span className="text-sm text-black">Signup with Google</span>
-            <BottomGradient />
-          </button>
-        </div>
       </form>
+      <div className="flex flex-col space-y-4">
+        <button
+          className="group/btn shadow-input relative flex h-10 w-full items-center justify-center space-x-2 rounded-md bg-white px-4 font-medium text-black"
+          type="submit"
+          onClick={googleLogin}
+        >
+          <IconBrandGoogle className="h-4 w-4 text-black" />
+          <span className="text-sm text-black">Signup with Google</span>
+          <BottomGradient />
+        </button>
+      </div>
     </div>
   );
 }

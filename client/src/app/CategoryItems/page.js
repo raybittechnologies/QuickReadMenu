@@ -1,8 +1,14 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
-export default function CategoryItemsManager({ categories, setCategories }) {
+export default function CategoryItemsManager({
+  categories,
+  setCategories,
+  onNext,
+}) {
+  const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState("");
   const [itemName, setItemName] = useState("");
   const [price, setPrice] = useState("");
@@ -17,7 +23,6 @@ export default function CategoryItemsManager({ categories, setCategories }) {
   };
 
   const updateItemsInCategory = () => {
-    console.log("rtrtrtrt");
     if (!itemName || !price) return;
 
     const newItem = {
@@ -204,6 +209,14 @@ export default function CategoryItemsManager({ categories, setCategories }) {
             }
           </ul>
         </div>
+      )}
+      {selectedCategory && createdItems && (
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded"
+          onClick={() => router.push("/signup")}
+        >
+          Continue
+        </button>
       )}
     </div>
   );

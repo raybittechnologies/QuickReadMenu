@@ -15,37 +15,26 @@ export default function CategoryItemsManager({ categories, setCategories }) {
     setDescription("");
     setEditIndex(null);
   };
+
   const updateItemsInCategory = () => {
+    console.log("rtrtrtrt");
     if (!itemName || !price) return;
-
-    const categoryIndex = categories.findIndex(
-      (cat) => cat === selectedCategory
-    );
-    if (categoryIndex === -1) return;
-
-    const currentItems = categories[categoryIndex]?.items || [];
 
     const newItem = {
       name: itemName,
       price,
       description,
     };
-    // console.log(newItem);
 
-    let updatedItems;
-    if (editIndex !== null) {
-      updatedItems = [...currentItems];
-      updatedItems[editIndex] = newItem;
-    } else {
-      updatedItems = [...currentItems, newItem];
-    }
-    console.log(updatedItems);
-
-    (prev) => {
+    setCreatedItems((prev) => {
       const prevBeta = { ...prev };
-      prevBeta[selectedCategory].push(newItem);
+
+      const arr = [...prevBeta[selectedCategory]];
+      arr.push(newItem);
+      prevBeta[selectedCategory] = arr;
+
       return prevBeta;
-    };
+    });
 
     resetForm();
   };
@@ -75,6 +64,8 @@ export default function CategoryItemsManager({ categories, setCategories }) {
     resetForm();
   };
 
+  useEffect(() => {}, [createdItems]);
+
   useEffect(() => {
     categories.map((el) =>
       setCreatedItems((prev) => {
@@ -84,9 +75,6 @@ export default function CategoryItemsManager({ categories, setCategories }) {
     );
   }, []);
 
-  console.log(createdItems);
-
-  console.log(categories);
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-xl font-bold mb-4">Add/Edit Items in Category</h2>
@@ -181,35 +169,39 @@ export default function CategoryItemsManager({ categories, setCategories }) {
             Items in {selectedCategory}
           </h3>
           <ul className="space-y-2">
-            {(
-              categories.find((c) => c.name === selectedCategory)?.items || []
-            ).map((item, index) => (
-              <li
-                key={index}
-                className="flex justify-between items-start bg-gray-50 p-3 rounded border"
-              >
-                <div>
-                  <div className="font-medium">{item}</div>
-                  <div className="text-sm text-gray-600">
-                    ₹{item.price} {item.description && `- ${item.description}`}
+            {
+              // (
+              //   categories.find((c) => c.name === selectedCategory)?.items || []
+              // )
+              createdItems[selectedCategory].map((item, index) => (
+                <li
+                  key={index}
+                  className="flex justify-between items-start bg-gray-50 p-3 rounded border"
+                >
+                  <div>
+                    <div className="font-medium">{item.name}</div>
+                    <div className="text-sm text-gray-600">
+                      ₹{item.price}{" "}
+                      {item.description && `- ${item.description}`}
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEdit(index)}
-                    className="text-blue-500 underline text-sm"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(index)}
-                    className="text-red-500 underline text-sm"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </li>
-            ))}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEdit(index)}
+                      className="text-blue-500 underline text-sm"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(index)}
+                      className="text-red-500 underline text-sm"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </li>
+              ))
+            }
           </ul>
         </div>
       )}

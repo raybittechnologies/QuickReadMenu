@@ -8,6 +8,8 @@ const {
   updateBusiness,
   deleteBusiness,
   getMenu,
+  getMyQr,
+  getMenuOnSlug,
 } = require("../Controllers/buisnesses.controller");
 
 const storage = multer.diskStorage({
@@ -30,14 +32,13 @@ const storage = multer.diskStorage({
 
     // Store file path relative to /public for use later
     if (!req.uploadedFiles) req.uploadedFiles = {};
-    req.uploadedFiles[
-      file.fieldname
-    ] = `/public/${file.fieldname}s/${filename}`;
+    req.uploadedFiles[file.fieldname] = `/${file.fieldname}s/${filename}`;
 
     cb(null, filename);
   },
 });
 const upload = multer({ storage });
+
 BusinessRouter.route("/")
   .post(
     upload.fields([
@@ -60,5 +61,7 @@ BusinessRouter.route("/:id")
   .delete(deleteBusiness);
 
 BusinessRouter.route("/menu/:id").get(getMenu);
+BusinessRouter.get("/getMyQr/:slug", getMyQr);
+BusinessRouter.get("/qr/:slug", getMenuOnSlug);
 
 module.exports = BusinessRouter;

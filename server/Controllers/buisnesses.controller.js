@@ -1,4 +1,7 @@
 const { catchAsync } = require("../Utils/catchAsync");
+const { sequelize } = require("../Models/index");
+var QRCode = require("qrcode");
+const path = require("path");
 
 const { Business, Categories, Items, Slugs } = require("../Models/index");
 const { default: slugify } = require("slugify");
@@ -6,12 +9,50 @@ const { default: slugify } = require("slugify");
 // Create a new Business
 exports.createBusiness = catchAsync(async (req, res, next) => {
   req.body = { ...req.body, ...req.uploadedFiles };
-  const newBuisness = await Business.create(req.body);
+  let operation = true;
+  let fileName;
+  const result = await sequelize.transaction(async (t) => {
+    const buisnessSlug = slugify(req.body.buisnessName);
+    fileName = `${Date.now()}-${buisnessSlug}`;
+    const location = path.join(
+      __dirname,
+      `../public/assets/qrcodes/${fileName}.png`
+    );
 
-  const buisnessSlug = slugify(req.body.buisnessName);
-  await Slugs.create({ slug: buisnessSlug, buisness_id: newBuisness.id });
+    req.body.qrcode = `/qrcodes/${fileName}.png`;
+    const newBuisness = await Business.create(req.body, { transaction: t });
 
-  res.status(201).json({ status: "success", data: newBuisness });
+    const qr = QRCode.toFile(
+      `${location}`,
+      `${process.env.SERVER_URI}/${buisnessSlug}`,
+      {
+        type: "png",
+        color: {
+          dark: "#000000",
+          light: "#ffffff",
+        },
+      },
+      function (err) {
+        if (err) {
+          t.rollback();
+          operation = false;
+        }
+      }
+    );
+
+    if (!operation) return;
+
+    await Slugs.create(
+      { slug: `/${buisnessSlug}`, buisness_id: newBuisness.id },
+      { transaction: t }
+    );
+
+    return { newBuisness, buisnessSlug };
+  });
+
+  if (!operation) return res.status(400).json({ status: "error" });
+
+  res.status(201).json({ status: "success", data: result.newBuisness });
 });
 
 // Get all Businesses
@@ -76,4 +117,33 @@ exports.getMenu = catchAsync(async (req, res, next) => {
   });
 
   res.status(200).json({ status: "success", data: Menu });
+});
+
+exports.getMyQr = catchAsync(async (req, res, next) => {
+  const slug = `/${req.params.slug}`;
+
+  const myQr = await Slugs.findOne({
+    where: { slug },
+    include: [{ model: Business, attributes: ["qrcode"] }],
+  });
+
+  res.status(200).json(myQr);
+});
+
+exports.getMenuOnSlug = catchAsync(async (req, res, next) => {
+  const slug = `/${req.params.slug}`;
+
+  const myQrMenu = await Slugs.findOne({
+    where: { slug },
+    include: [
+      {
+        model: Business,
+        attributes: ["qrcode", "logo", "banner", "businessName"],
+        include: { model: Categories, include: { model: Items } },
+      },
+    ],
+  });
+
+  const menu = myQrMenu.buisness;
+  res.status(200).json({ status: "success", menu });
 });

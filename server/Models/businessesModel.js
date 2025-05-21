@@ -5,10 +5,10 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    buisnessName: {
+    businessName: {
       type: DataTypes.STRING,
     },
-    buisnesstype: {
+    businesstype: {
       type: DataTypes.STRING,
     },
     country: {

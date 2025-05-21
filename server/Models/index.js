@@ -13,7 +13,7 @@ const sequelize = new Sequelize(
 
 const db = {};
 const associations = require("./Associations/index");
-
+db.sequelize = sequelize;
 db.Business = require("./businessesModel")(sequelize, DataTypes);
 db.Categories = require("./categories.model")(sequelize, DataTypes);
 db.Items = require("./items.model")(sequelize, DataTypes);
@@ -25,7 +25,7 @@ associations(db);
   try {
     await sequelize.authenticate();
     // await sequelize.sync({ force: true });
-    // await db.Slugs.sync({ force: true });
+    // await db.Business.sync({ alter: true });
     console.log("DB Connection has been established successfully.");
   } catch (error) {
     console.error("Unable to connect to the database:", error);

@@ -4,7 +4,10 @@ const { catchAsync } = require("../Utils/catchAsync");
 // Create a new item
 exports.createItem = catchAsync(async (req, res, next) => {
   const item = await Items.create(req.body);
-  res.status(201).json({ status: "success", data: item });
+
+  const { dataValues } = await item.getCategory();
+
+  res.status(201).json({ status: "success", [dataValues["name"]]: item });
 });
 
 // Get all items
@@ -41,3 +44,5 @@ exports.deleteItem = catchAsync(async (req, res, next) => {
   await item.destroy();
   res.status(204).json({ status: "success", data: null });
 });
+
+// exports.getItemsRestaurant = catchAsync(async);

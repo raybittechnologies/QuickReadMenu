@@ -14,7 +14,7 @@ const MenuPreview = ({
   const selectedBanner =
     bannerProp || bannerImages[businessType] || fallbackBanner;
   return (
-    <div className="w-full flex justify-center relative -top-40">
+    <div className="w-full flex justify-center md:relative md:-top-40">
       <div className=" w-[350px] h-[667px] bg-black rounded-[50px] border-[14px] border-black scale-75 shadow-xl">
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-38 h-4 bg-black rounded-b-[10px] z-10"></div>
 

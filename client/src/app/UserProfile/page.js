@@ -1,0 +1,478 @@
+"use client";
+import React, { useState } from "react";
+import {
+  FaHome,
+  FaUtensils,
+  FaList,
+  FaUser,
+  FaCog,
+  FaSignOutAlt,
+  FaPlus,
+  FaFolderOpen,
+  FaEdit,
+  FaArrowDown,
+} from "react-icons/fa";
+import Button from "../components/Button/page";
+
+const tabs = [
+  { id: "home", label: "Home", icon: FaHome },
+  {
+    id: "menu",
+    label: "Menu",
+    icon: FaUtensils,
+    subOptions: [
+      { id: "add-category", label: "Add Category", icon: FaPlus },
+      { id: "add-product", label: "Add Product", icon: FaFolderOpen },
+      { id: "customize", label: "Customize", icon: FaEdit },
+    ],
+  },
+  { id: "myMenus", label: "My Menus", icon: FaList, badge: 14 },
+  { id: "account", label: "My Account", icon: FaUser },
+  { id: "settings", label: "Settings", icon: FaCog },
+  { id: "logout", label: "Log Out", icon: FaSignOutAlt },
+];
+
+const Profile = () => {
+  const [activeTab, setActiveTab] = useState("home");
+  const [expandedTab, setExpandedTab] = useState(null);
+  const [selectedSubOption, setSelectedSubOption] = useState(null);
+  const [addCategoryView, setAddCategoryView] = useState(false);
+  const [selected, setSelected] = useState("Edit categories");
+
+  const options = [
+    "Edit categories",
+    "Add product",
+    "Edit business profile",
+    "Add logo and banner",
+  ];
+
+  const handleSelect = (option) => {
+    setSelected(option === selected ? "" : option);
+  };
+
+  const handleTabClick = (id, hasSubOptions) => {
+    if (hasSubOptions) {
+      setExpandedTab(expandedTab === id ? null : id);
+      setActiveTab(id);
+    } else {
+      setActiveTab(id);
+      setExpandedTab(null);
+      setSelectedSubOption(null);
+      setAddCategoryView(false);
+    }
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "home":
+        return (
+          <div className="space-y-6">
+            {/* Go Pro */}
+            <div className="bg-white shadow rounded-lg p-4 flex flex-col md:flex-row items-center gap-4">
+              <img
+                src="https://img.freepik.com/free-vector/access-code-handprint-scanner-secure-entry-individual-sign-system-security-personal-parole-male-computer-user-cartoon-character_335657-2573.jpg"
+                alt="No Ads"
+                className="w-20 h-20"
+              />
+              <div className="flex-1 space-y-4">
+                <h2 className="font-semibold text-lg">
+                  Go Pro – No Ads, Full Control!
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Enhance your menus with a clean, ad-free experience. Keep
+                  customers focused on your offerings and strengthen your brand
+                  image.
+                </p>
+                <Button text="Upgrade at $9/month" />
+              </div>
+            </div>
+
+            {/* Google Connect */}
+            <div className="bg-white shadow rounded-lg p-4 flex flex-col md:flex-row items-start gap-4">
+              <img
+                src="https://img.freepik.com/free-vector/real-estate-searching-illustration_23-2148655466.jpg"
+                alt="Google Connect"
+                className="w-20 h-20 mx-auto"
+              />
+              <div className="flex-1 space-y-4">
+                <h2 className="font-semibold text-lg">
+                  Get More Customers with Google!
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Link your menus to Google My Business to appear in local
+                  searches, attract more customers, and boost your online
+                  visibility effortlessly.
+                </p>
+                <Button text="Connect now →" variant="secondary" />
+              </div>
+            </div>
+
+            {/* QR Section */}
+            <div className="bg-white shadow rounded-lg p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+              <img
+                src="https://img.freepik.com/free-vector/scan-me-qr-code_78370-2915.jpg"
+                alt="QR Code"
+                className="w-28 h-28"
+              />
+              <div className="flex-1 md:text-left">
+                <p className="text-sm text-gray-600 mb-4">
+                  This is the QR code that links to your menu’s home page with
+                  categories.
+                </p>
+                <Button text="Publish" variant="secondary" />
+              </div>
+            </div>
+
+            {/* Checklist */}
+            <div className="bg-white shadow rounded-lg p-4">
+              <h3 className="font-semibold text-lg mb-4">
+                You are off to a great start
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  {options.map((option) => (
+                    <div key={option} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selected === option}
+                        onChange={() => handleSelect(option)}
+                      />
+                      <span className="text-sm">{option}</span>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  text={selected ? selected : "Select an action"}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          </div>
+        );
+      case "menu":
+        if (addCategoryView) {
+          return (
+            <div className="space-y-4">
+              <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 justify-between">
+                <h2 className="text-lg font-semibold">Categories</h2>
+                <Button text=" Add Category" variant="primary" />
+              </div>
+
+              <div className="flex space-x-4 pb-2">
+                {["All", "Active", "Draft"].map((tab) => (
+                  <button
+                    key={tab}
+                    className={`text-md ${
+                      tab === "All"
+                        ? "border-b-2 border-[#6220fb] text-[#6220fb] font-semibold"
+                        : "text-gray-600"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
+              <div className="bg-white shadow rounded-lg overflow-x-auto">
+                <div className="p-4">
+                  <input
+                    type="text"
+                    placeholder="Search"
+                    className="border px-3 py-2 rounded-md text-sm w-full md:w-1/3"
+                  />
+                </div>
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-[#6220fb] bg-gray-50 text-gray-600 text-left">
+                      <th className="p-4">
+                        <input type="checkbox" />
+                      </th>
+                      <th className="p-4">Categories</th>
+                      <th className="p-4">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {["Main", "Dessert", "Beverage"].map((category) => (
+                      <tr key={category} className=" hover:bg-gray-50">
+                        <td className="p-4">
+                          <input type="checkbox" />
+                        </td>
+                        <td className="p-4 flex items-center gap-2">
+                          <span className="text-md font-semibold">
+                            {category}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
+                            Active
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          );
+        }
+        if (selectedSubOption === "Add Product") {
+          return (
+            <div className="space-y-8">
+              {/* Top Controls */}
+              <div className="flex justify-between items-center">
+                <div className="flex flex-col md:flex-row gap-4 md:gap-8">
+                  <div className="flex items-center gap-4">
+                    <Button text="Import" variant="secondary" />
+                    <Button text="Export" variant="secondary" />
+                  </div>
+                  <Button text=" Add Product" variant="primary" />
+                </div>
+              </div>
+
+              {/* Tabs */}
+              <div className="flex space-x-6 text-sm">
+                {["All", "Active", "Draft"].map((tab, index) => (
+                  <button
+                    key={tab}
+                    className={`pb-2 ${
+                      index === 0
+                        ? "border-b-2 border-[#6220fb] text-[#6220fb] font-medium"
+                        : "text-gray-600"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
+              {/* Filters */}
+              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+                <select className="border text-sm px-3 py-2 rounded-md">
+                  <option>All categories</option>
+                  <option>Chinese</option>
+                  <option>North Indian</option>
+                  <option>Wazwaan</option>
+                </select>
+                <input
+                  type="text"
+                  placeholder="Search"
+                  className="border px-3 py-2 rounded-md text-sm flex-1 md:max-w-md"
+                />
+              </div>
+
+              {/* Product Table */}
+              <div className="bg-white shadow rounded-lg overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="text-left border-b border-[#6220fb] bg-gray-50 text-gray-600">
+                      <th className="p-4">
+                        <input type="checkbox" />
+                      </th>
+                      <th className="p-4">Products</th>
+                      <th className="p-4">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { name: "New2", price: 234 },
+                      { name: "New", price: 12 },
+                      { name: "Coke", price: 3 },
+                    ].map((product) => (
+                      <tr key={product.name} className="hover:bg-gray-50">
+                        <td className="p-4">
+                          <input type="checkbox" />
+                        </td>
+                        <td className="p-4 flex items-center gap-3">
+                          <div>
+                            <div className="font-medium">{product.name}</div>
+                            <div className="text-xs text-gray-500">
+                              &#8377; {product.price}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
+                            Active
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          );
+        }
+        if (selectedSubOption === "Customize") {
+          return (
+            <div className="space-y-8">
+              <span className="text-xl">{selectedSubOption}</span>
+              <div className="space-y-6">
+                {/* Logo and Main Banner Upload */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                  <div className="bg-white shadow rounded-lg p-4">
+                    <h3 className="font-semibold mb-2">Logo</h3>
+                    <img
+                      src="https://raybittechnologies.com/wp-content/uploads/2024/03/logoraybit-new.png"
+                      alt="logo"
+                      className="w-auto h-20 mb-4"
+                    />
+                    <Button text="Edit & Replace" variant="secondary" />
+                  </div>
+                  <div className="bg-white shadow rounded-lg p-4">
+                    <h3 className="font-semibold mb-2">Main banner</h3>
+                    <img
+                      src="https://raybittechnologies.com/wp-content/uploads/2024/03/logoraybit-new.png"
+                      alt="logo"
+                      className="w-auto h-20 mb-4"
+                    />
+                    <Button text="Edit & Replace" variant="secondary" />
+                  </div>
+                </div>
+
+                {/* Social Media Links */}
+                <div className="bg-white shadow rounded-lg p-4">
+                  <h3 className="font-semibold mb-4">Social Media</h3>
+                  {[
+                    "Twitter",
+                    "Facebook",
+                    "Instagram",
+                    "Pinterest",
+                    "YouTube",
+                    "Trip Advisor",
+                  ].map((platform) => (
+                    <div key={platform} className="mb-3">
+                      <label className="block text-sm font-medium mb-1">
+                        {platform}
+                      </label>
+                      <input
+                        type="text"
+                        placeholder={`${platform.toLowerCase()} profile`}
+                        className="w-full border px-3 py-2 rounded text-sm"
+                      />
+                    </div>
+                  ))}
+                  <Button text="Save" variant="primary" />
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold">Menu Management</h2>
+            {selectedSubOption && (
+              <p className="text-sm">You selected: {selectedSubOption}</p>
+            )}
+          </div>
+        );
+
+      case "myMenus":
+        return <div>📑 My Menus Content</div>;
+      case "account":
+        return <div>👤 My Account Content</div>;
+      case "settings":
+        return <div>⚙️ Settings Content</div>;
+      case "logout":
+        return <div>🔓 Logging out...</div>;
+      default:
+        return <div>Choose a tab</div>;
+    }
+  };
+
+  return (
+    <div className="flex h-screen overflow-hidden">
+      <div className="flex flex-col bg-white text-gray-700 w-[5rem] md:w-[20rem] flex-shrink-0 h-[100vh] overflow-hidden justify-between">
+        <div>
+          <input
+            type="text"
+            placeholder="https://qrmenu.com/menus/raybit-technologies"
+            className="hidden md:block w-[19rem] p-2 border border-gray-300 text-xs text-center rounded-md m-2"
+          />
+          <div className="w-[5rem] md:w-full flex flex-col justify-start p-2">
+            {tabs
+              .filter((t) => t.id !== "settings" && t.id !== "logout")
+              .map(({ id, label, icon: Icon, badge, subOptions }) => (
+                <React.Fragment key={id}>
+                  <button
+                    onClick={() => handleTabClick(id, !!subOptions)}
+                    className={`flex items-center justify-center md:justify-start w-full md:w-auto p-3 md:rounded-lg text-start transition-all hover:bg-blue-50 hover:text-[#6220fb] ${
+                      activeTab === id ? "bg-blue-50 text-[#6220fb]" : ""
+                    }`}
+                  >
+                    <div className="grid place-items-center mr-0 md:mr-4">
+                      <Icon />
+                    </div>
+                    <div className="hidden md:flex items-center justify-between w-full">
+                      <span>{label}</span>
+                      {subOptions && (
+                        <FaArrowDown
+                          className={`ml-2 h-3 w-3 transition-transform duration-200 ${
+                            expandedTab === id ? "rotate-180" : ""
+                          }`}
+                        />
+                      )}
+                    </div>
+                    {badge && (
+                      <div className="ml-auto hidden md:flex">
+                        <span className="bg-blue-500/20 text-blue-900 px-2 py-1 text-xs rounded-full font-bold">
+                          {badge}
+                        </span>
+                      </div>
+                    )}
+                  </button>
+
+                  {/* Sub-options */}
+                  {expandedTab === id &&
+                    subOptions?.map(
+                      ({ id: subId, label: subLabel, icon: SubIcon }) => (
+                        <button
+                          key={subId}
+                          onClick={() => {
+                            setActiveTab("menu");
+                            setSelectedSubOption(subLabel);
+                            setAddCategoryView(subLabel === "Add Category");
+                          }}
+                          className="ml-4 flex items-center gap-4 text-left text-sm text-gray-600 hover:text-[#6220fb] py-2"
+                        >
+                          <SubIcon className="h-4 w-4" />
+                          <span className="hidden md:inline">{subLabel}</span>
+                        </button>
+                      )
+                    )}
+                </React.Fragment>
+              ))}
+          </div>
+        </div>
+
+        {/* Bottom items */}
+        <div className="w-[3rem] md:w-full flex flex-col p-2 border-t border-gray-200">
+          {tabs
+            .filter((t) => t.id === "settings" || t.id === "logout")
+            .map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => handleTabClick(id)}
+                className={`flex items-center justify-center md:justify-start w-full md:w-auto p-3 md:rounded-lg text-start transition-all hover:bg-blue-50 hover:text-[#6220fb] ${
+                  activeTab === id ? "bg-blue-50 text-[#6220fb]" : ""
+                }`}
+              >
+                <div className="grid place-items-center mr-0 md:mr-4">
+                  <Icon />
+                </div>
+                <span className="hidden md:inline">{label}</span>
+              </button>
+            ))}
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 p-6 bg-gray-50 overflow-y-auto">
+        {renderContent()}
+      </div>
+    </div>
+  );
+};
+
+export default Profile;

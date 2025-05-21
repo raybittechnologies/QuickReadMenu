@@ -21,7 +21,7 @@ exports.createBusiness = catchAsync(async (req, res, next) => {
     );
 
     req.body.qrcode = `/qrcodes/${fileName}.png`;
-    req.body.user_id = "b5f9638b-5768-4a22-b36a-1533e3934d40";
+    req.body.user_id = "6bc37f71-47af-4ff9-9fb2-f5a905e1a550";
     const newBuisness = await Business.create(req.body, { transaction: t });
 
     const qr = QRCode.toFile(

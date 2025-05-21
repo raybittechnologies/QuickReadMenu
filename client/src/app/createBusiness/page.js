@@ -29,8 +29,8 @@ export default function createBusiness() {
       asliPayload.add_country = payload.details.country;
       asliPayload.add_zip = payload.details.pincode;
       asliPayload.add_phone = "9906990600";
-      asliPayload.logo = payload.storedLogo;
-      asliPayload.banner = payload.storedBanner;
+      // asliPayload.logo = payload.storedLogo;
+      // asliPayload.banner = payload.storedBanner;
       asliPayload.categories = payload.storedCategories;
       asliPayload.items = payload.items;
       console.log(asliPayload);
@@ -46,6 +46,7 @@ export default function createBusiness() {
       asliPayload.categories.forEach((category, index) => {
         formData.append(`categories[${index}]`, category);
       });
+
       // Handle nested items object
       for (const category in asliPayload.items) {
         asliPayload.items[category].forEach((item, index) => {

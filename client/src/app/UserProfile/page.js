@@ -3,14 +3,18 @@ import React, { useState } from "react";
 import {
   FaHome,
   FaUtensils,
-  FaList,
-  FaUser,
   FaCog,
   FaSignOutAlt,
   FaPlus,
   FaFolderOpen,
   FaEdit,
   FaArrowDown,
+  FaUserCog,
+  FaCreditCard,
+  FaFile,
+  FaCloud,
+  FaGlobe,
+  FaBalanceScale,
 } from "react-icons/fa";
 import Button from "../components/Button/page";
 
@@ -26,10 +30,47 @@ const tabs = [
       { id: "customize", label: "Customize", icon: FaEdit },
     ],
   },
-  { id: "myMenus", label: "My Menus", icon: FaList, badge: 14 },
-  { id: "account", label: "My Account", icon: FaUser },
+
   { id: "settings", label: "Settings", icon: FaCog },
   { id: "logout", label: "Log Out", icon: FaSignOutAlt },
+];
+const settingsOptions = [
+  {
+    title: "General",
+    description: "View and update your store details",
+    icon: <FaCog className="w-5 h-5 text-[#6220fb]" />,
+  },
+  {
+    title: "Plan and permissions",
+    description:
+      "View plan information and manage what staff can see or do in your store",
+    icon: <FaUserCog className="w-5 h-5 text-[#6220fb]" />,
+  },
+  {
+    title: "Payments",
+    description: "Enable and manage your store's payment providers",
+    icon: <FaCreditCard className="w-5 h-5 text-[#6220fb]" />,
+  },
+  {
+    title: "Files",
+    description: "Upload images, videos and documents",
+    icon: <FaFile className="w-5 h-5 text-[#6220fb]" />,
+  },
+  {
+    title: "Backups",
+    description: "Check your last backups",
+    icon: <FaCloud className="w-5 h-5 text-[#6220fb]" />,
+  },
+  {
+    title: "Store languages",
+    description: "Manage the languages your customers can view on your store",
+    icon: <FaGlobe className="w-5 h-5 text-[#6220fb]" />,
+  },
+  {
+    title: "Legal",
+    description: "Manage your store's legal pages",
+    icon: <FaBalanceScale className="w-5 h-5 text-[#6220fb]" />,
+  },
 ];
 
 const Profile = () => {
@@ -67,8 +108,9 @@ const Profile = () => {
       case "home":
         return (
           <div className="space-y-6">
+            <span className="uppercase text-xl font-semibold">{activeTab}</span>
             {/* Go Pro */}
-            <div className="bg-white shadow rounded-lg p-4 flex flex-col md:flex-row items-center gap-4">
+            <div className="bg-white shadow rounded-lg p-4 flex flex-col md:flex-row items-center gap-4 mt-4">
               <img
                 src="https://img.freepik.com/free-vector/access-code-handprint-scanner-secure-entry-individual-sign-system-security-personal-parole-male-computer-user-cartoon-character_335657-2573.jpg"
                 alt="No Ads"
@@ -178,7 +220,7 @@ const Profile = () => {
                   <input
                     type="text"
                     placeholder="Search"
-                    className="border px-3 py-2 rounded-md text-sm w-full md:w-1/3"
+                    className="border px-3 py-2 rounded-md text-sm w-full md:w-1/2"
                   />
                 </div>
                 <table className="min-w-full text-sm">
@@ -220,8 +262,8 @@ const Profile = () => {
             <div className="space-y-8">
               {/* Top Controls */}
               <div className="flex justify-between items-center">
-                <div className="flex flex-col md:flex-row gap-4 md:gap-8">
-                  <div className="flex items-center gap-4">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex items-center">
                     <Button text="Import" variant="secondary" />
                     <Button text="Export" variant="secondary" />
                   </div>
@@ -256,7 +298,7 @@ const Profile = () => {
                 <input
                   type="text"
                   placeholder="Search"
-                  className="border px-3 py-2 rounded-md text-sm flex-1 md:max-w-md"
+                  className="border px-3 py-2 rounded-md text-sm flex-1 w-full"
                 />
               </div>
 
@@ -373,7 +415,30 @@ const Profile = () => {
       case "account":
         return <div>👤 My Account Content</div>;
       case "settings":
-        return <div>⚙️ Settings Content</div>;
+        return (
+          <div className="">
+            <h2 className="text-2xl font-semibold mb-6">Settings</h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {settingsOptions.map((option, index) => (
+                <div
+                  key={index}
+                  className="flex items-start gap-4 bg-[#6220fb]/10 rounded-lg p-4 hover:bg-[#6220fb]/20 transition-colors cursor-pointer shadow-sm"
+                >
+                  <div className="mt-2">{option.icon}</div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-[#6220fb]">
+                      {option.title}
+                    </h4>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {option.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
       case "logout":
         return <div>🔓 Logging out...</div>;
       default:

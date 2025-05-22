@@ -5,7 +5,7 @@ import { Input } from "../components/Input/page";
 import { Label } from "../components/Label/page";
 import { cn } from "../utils/util";
 
-export default function SignupForm() {
+export default function LoginForm() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Form submitted");
@@ -16,7 +16,7 @@ export default function SignupForm() {
         Welcome to Menu
       </h2>
       <p className="text-center mt-2 max-w-sm text-sm text-white ">
-        Signup to continue
+        Login to continue
       </p>
       <form className="my-8" onSubmit={handleSubmit}>
         <LabelInputContainer className="mb-4">
@@ -32,7 +32,7 @@ export default function SignupForm() {
           className="group/btn relative block h-10 w-full mt-8 rounded-md bg-white font-medium text-black shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset]"
           type="submit"
         >
-          Sign up &rarr;
+          Login &rarr;
           <BottomGradient />
         </button>
 
@@ -44,7 +44,7 @@ export default function SignupForm() {
             type="submit"
           >
             <IconBrandGoogle className="h-4 w-4 text-black" />
-            <span className="text-sm text-black">Signup with Google</span>
+            <span className="text-sm text-black">Continue with Google</span>
             <BottomGradient />
           </button>
         </div>

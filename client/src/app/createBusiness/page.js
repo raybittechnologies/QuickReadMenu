@@ -5,6 +5,12 @@ import axios from "axios";
 import { register } from "../utils/api";
 
 export default function createBusiness() {
+  const urlToFile = async (url, filename, mimeType) => {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    return new File([blob], filename, { type: mimeType });
+  };
+
   useEffect(() => {
     const generateAndSend = async () => {
       const payload = {};
@@ -29,8 +35,8 @@ export default function createBusiness() {
       asliPayload.add_country = payload.details.country;
       asliPayload.add_zip = payload.details.pincode;
       asliPayload.add_phone = "9906990600";
-      // asliPayload.logo = payload.storedLogo;
-      // asliPayload.banner = payload.storedBanner;
+      asliPayload.logo = payload.storedLogo;
+      asliPayload.banner = payload.storedBanner;
       asliPayload.categories = payload.storedCategories;
       asliPayload.items = payload.items;
       console.log(asliPayload);
@@ -38,10 +44,30 @@ export default function createBusiness() {
       const formData = new FormData();
       // Add simple fields
       for (const key in asliPayload) {
-        if (key !== "items" && key !== "categories") {
+        if (
+          key !== "items" &&
+          key !== "categories" &&
+          key !== "logo" &&
+          key !== "banner"
+        ) {
           formData.append(key, asliPayload[key]);
         }
       }
+
+      const logoFile = await urlToFile(
+        payload.storedLogo,
+        "logo.png",
+        "image/png"
+      );
+      const bannerFile = await urlToFile(
+        payload.storedBanner,
+        "banner.png",
+        "image/png"
+      );
+
+      formData.append("logo", logoFile);
+      formData.append("banner", bannerFile);
+
       // Handle categories array
       asliPayload.categories.forEach((category, index) => {
         formData.append(`categories[${index}]`, category);

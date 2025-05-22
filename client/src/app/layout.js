@@ -1,6 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { LoadScript } from "@react-google-maps/api";
 import Script from "next/script";
 
 const geistSans = Geist({

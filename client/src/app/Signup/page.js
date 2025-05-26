@@ -6,11 +6,34 @@ import { Label } from "../components/Label/page";
 import { cn } from "../utils/util";
 
 export default function SignupForm() {
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Form submitted");
-  };
+  // const [email, setEmail] = useState("");
+  // const [password, setPassword] = useState("");
+  // const router = useRouter();
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+
+  //   try {
+  //     const res = await fetch("http://localhost:5050/api/v1/auth/signup", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ email, password }),
+  //     });
+
+  //     if (!res.ok) throw new Error("Signup failed");
+
+  //     const data = await res.json();
+
+  //     localStorage.setItem("user", JSON.stringify(data));
+
+  //     router.push("/userprofile");
+  //   } catch (err) {
+  //     console.error("Signup error:", err);
+  //     alert("Signup failed. Please try again.");
+  //   }
+  // };
   const googleLogin = () => {
     window.location.href = "http://localhost:5050/api/v1/auth/google/signup";
   };
@@ -22,7 +45,7 @@ export default function SignupForm() {
       <p className="text-center mt-2 max-w-sm text-sm text-white ">
         Signup to continue
       </p>
-      <form className="my-8" onSubmit={handleSubmit}>
+      <form className="my-8">
         <LabelInputContainer className="mb-4">
           <Label htmlFor="email">Email Address</Label>
           <Input id="email" placeholder="raybit@menu.com" type="email" />
@@ -33,6 +56,7 @@ export default function SignupForm() {
         </LabelInputContainer>
 
         <button
+          // onSubmit={handleSubmit}
           className="group/btn relative block h-10 w-full mt-8 rounded-md bg-white font-medium text-black shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset]"
           type="submit"
         >

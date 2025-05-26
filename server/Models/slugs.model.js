@@ -10,11 +10,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       unique: true,
     },
-    buisness_id: {
+    business_id: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: "buisnesses",
+        model: "businesses",
         key: "id",
       },
       onUpdate: "CASCADE",

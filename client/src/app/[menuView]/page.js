@@ -61,7 +61,8 @@ const QRMenuView = () => {
   useEffect(() => {
     getQrMenu(menuView).then(
       ({ data }) => {
-        setMenu(data.menu);
+        setMenu(data.business);
+
         setError(null);
       },
       (err) => {
@@ -86,7 +87,11 @@ const QRMenuView = () => {
 
         <div>
           <img
-            src={`${BASE_URI}/${menu.logo}`}
+            src={
+              menu.logo
+                ? `http://localhost:5050/${menu.logo}`
+                : "https://img.freepik.com/free-vector/vintage-restaurant-menu_23-2147491098.jpg?ga=GA1.1.364166860.1747116538&semt=ais_hybrid&w=740"
+            }
             alt="logo"
             className="h-24 w-24 rounded-full mx-auto shadow-md"
           />

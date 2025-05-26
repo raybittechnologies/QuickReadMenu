@@ -81,13 +81,11 @@ exports.login = catchAsync(async (req, res, next) => {
 
 exports.protect = catchAsync(async (req, res, next) => {
   const tokenUser = getTokenData(req);
-
   if (!tokenUser) return res.status(401).json({ message: "Unauthorized" });
 
   const users = await User.findOne({
-    where: { email: tokenUser.data },
+    where: { email: tokenUser.data.email },
   });
-
   req.user = {
     id: users.id,
     email: users.email,
@@ -128,7 +126,7 @@ exports.googleCallback = catchAsync(async (req, res, next) => {
           email: user.email,
         });
 
-        return res.redirect(`${process.env.FE_URL}/createBusiness`);
+        return res.redirect(`${process.env.FE_URL}/createBusiness/${token}`);
       }
 
       await User.create({
@@ -140,7 +138,7 @@ exports.googleCallback = catchAsync(async (req, res, next) => {
         email: user.email,
       });
 
-      res.redirect(`${process.env.FE_URL}/createBusiness`);
+      res.redirect(`${process.env.FE_URL}/createBusiness/${token}`);
     }
   )(req, res, next);
 });

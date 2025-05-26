@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const Business = sequelize.define("buisnesses", {
+  const Business = sequelize.define("businesses", {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -45,6 +45,10 @@ module.exports = (sequelize, DataTypes) => {
     user_id: {
       type: DataTypes.UUID,
       allowNull: false,
+    },
+    is_published: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
   });
 

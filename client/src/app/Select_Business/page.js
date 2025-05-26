@@ -7,7 +7,7 @@ const BusinessSetup = ({ selectedType, setSelectedType, setBanner }) => {
     const value = e.target.value;
     console.log(value);
     setSelectedType(value);
-    addBusiness({ businesstype: value });
+    // addBusiness({ businesstype: value });
 
     const defaultBanner = bannerImages[value];
     if (defaultBanner) {

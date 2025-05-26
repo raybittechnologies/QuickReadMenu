@@ -1,16 +1,20 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Button from "../components/Button/page";
 
 export default function CategoryItemsManager({
   categories,
-  setCategories,
-  onNext,
+  // setCategories,
   createdItems,
   setCreatedItems,
 }) {
   const router = useRouter();
+  const handleContinue = () => {
+    const token = localStorage.getItem("token");
+    router.push(token ? `/createBusiness/${token}` : "/signup");
+  };
 
   const [selectedCategory, setSelectedCategory] = useState("");
   const [itemName, setItemName] = useState("");
@@ -47,11 +51,10 @@ export default function CategoryItemsManager({
     resetForm();
   };
 
-  console.log(createdItems);
-
+  console.log("createdItems", createdItems);
   const handleEdit = (index) => {
-    const cat = categories.find((c) => c.name === selectedCategory);
-    const item = cat?.items?.[index];
+    const item = createdItems[selectedCategory]?.[index];
+
     if (item) {
       setItemName(item.name);
       setPrice(item.price);
@@ -61,16 +64,14 @@ export default function CategoryItemsManager({
   };
 
   const handleDelete = (index) => {
-    const updatedCategories = categories.map((cat) => {
-      if (cat.name === selectedCategory) {
-        const items = [...(cat.items || [])];
-        items.splice(index, 1);
-        return { ...cat, items };
-      }
-      return cat;
+    setCreatedItems((prev) => {
+      const updated = { ...prev };
+      const items = [...(updated[selectedCategory] || [])];
+      items.splice(index, 1);
+      updated[selectedCategory] = items;
+      return updated;
     });
 
-    setCategories(updatedCategories);
     resetForm();
   };
 
@@ -136,7 +137,7 @@ export default function CategoryItemsManager({
             <input
               type="number"
               value={price}
-              onChange={(e) => setPrice(e.target.value)}
+              onChange={(e) => setPrice(e.target.value.replace(/[^0-9.]/g, ""))}
               className="w-full border border-gray-300 rounded px-3 py-2"
               placeholder="e.g., 249"
             />
@@ -154,12 +155,11 @@ export default function CategoryItemsManager({
             />
           </div>
 
-          <button
+          <Button
             onClick={updateItemsInCategory}
-            className="bg-blue-600 text-white px-4 py-2 rounded"
-          >
-            {editIndex !== null ? "Update Item" : "Add Item"}
-          </button>
+            text={` ${editIndex !== null ? "Update Item" : "Add Item"}`}
+            variant="secondary"
+          />
 
           {editIndex !== null && (
             <button
@@ -216,12 +216,7 @@ export default function CategoryItemsManager({
         </div>
       )}
       {selectedCategory && createdItems && (
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-          onClick={() => router.push("/signup")}
-        >
-          Continue
-        </button>
+        <Button onClick={handleContinue} text="Continue" />
       )}
     </div>
   );

@@ -1,16 +1,24 @@
 "use client"; // Only needed in app router
 
-import { useEffect } from "react";
-import axios from "axios";
-import { register } from "../utils/api";
+import { register } from "@/app/utils/api";
+import { useSearchParams } from "next/navigation";
+import { use, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export default function createBusiness() {
+export default function createBusiness({ params }) {
+  const { slug } = use(params);
   const urlToFile = async (url, filename, mimeType) => {
     const res = await fetch(url);
     const blob = await res.blob();
     return new File([blob], filename, { type: mimeType });
   };
-
+  const router = useRouter();
+  useEffect(() => {
+    console.log("Token:", slug);
+    if (slug) {
+      localStorage.setItem("token", slug);
+    }
+  }, []);
   useEffect(() => {
     const generateAndSend = async () => {
       const payload = {};
@@ -54,16 +62,22 @@ export default function createBusiness() {
         }
       }
 
-      const logoFile = await urlToFile(
-        payload.storedLogo,
-        "logo.png",
-        "image/png"
-      );
-      const bannerFile = await urlToFile(
-        payload.storedBanner,
-        "banner.png",
-        "image/png"
-      );
+      let logoFile = null;
+      let bannerFile = null;
+
+      // Check if logo is a base64 image (indicating it's uploaded)
+      if (payload.storedLogo?.startsWith("data:image")) {
+        logoFile = await urlToFile(payload.storedLogo, "logo.png", "image/png");
+      }
+
+      // Check if banner is a base64 image (indicating it's uploaded)
+      if (payload.storedBanner?.startsWith("data:image")) {
+        bannerFile = await urlToFile(
+          payload.storedBanner,
+          "banner.png",
+          "image/png"
+        );
+      }
 
       formData.append("logo", logoFile);
       formData.append("banner", bannerFile);
@@ -75,9 +89,7 @@ export default function createBusiness() {
 
       // Handle nested items object
       for (const category in asliPayload.items) {
-        console.log(category);
         asliPayload.items[category].forEach((item, index) => {
-          console.log(item);
           formData.append(`items[${category}][${index}][name]`, item.name);
           formData.append(`items[${category}][${index}][price]`, item.price);
           formData.append(
@@ -86,14 +98,11 @@ export default function createBusiness() {
           );
         });
       }
-      // Debug output (for dev use only)
-      for (let pair of formData.entries()) {
-        console.log(`${pair[0]}: ${pair[1]}`);
-      }
+
       register(formData)
         .then((res) => {
           console.log("Response:", res.data);
-          // Handle success (e.g., redirect or show a message)
+          router.push("/UserProfile");
         })
         .catch((err) => {
           console.error("Error:", err);

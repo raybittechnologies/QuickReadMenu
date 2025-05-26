@@ -5,6 +5,8 @@ const path = require("path");
 
 const { Business, Categories, Items, Slugs } = require("../Models/index");
 const { default: slugify } = require("slugify");
+const { or, where } = require("sequelize");
+const { create } = require("domain");
 
 // Create a new Business
 exports.createBusiness = catchAsync(async (req, res, next) => {
@@ -21,12 +23,14 @@ exports.createBusiness = catchAsync(async (req, res, next) => {
     );
 
     req.body.qrcode = `/qrcodes/${fileName}.png`;
-    req.body.user_id = "b5f9638b-5768-4a22-b36a-1533e3934d40";
-    const newBuisness = await Business.create(req.body, { transaction: t });
+    // req.body.user_id = "96cb1341-5677-469b-a2d8-e90b03efbbf6";
+    req.body.user_id = req.user.id;
+
+    const newBusiness = await Business.create(req.body, { transaction: t });
 
     const qr = QRCode.toFile(
       `${location}`,
-      `${process.env.SERVER_URI}/${businessSlug}`,
+      `${process.env.FE_URL}/${businessSlug}`,
       {
         type: "png",
         color: {
@@ -45,7 +49,7 @@ exports.createBusiness = catchAsync(async (req, res, next) => {
     if (!operation) return;
 
     await Slugs.create(
-      { slug: `/${businessSlug}`, buisness_id: newBuisness.id },
+      { slug: `/${businessSlug}`, business_id: newBusiness.id },
       { transaction: t }
     );
 
@@ -53,7 +57,7 @@ exports.createBusiness = catchAsync(async (req, res, next) => {
       const category = await Categories.create(
         {
           name: categoryName,
-          business_id: newBuisness.id,
+          business_id: newBusiness.id,
         },
         { transaction: t }
       );
@@ -73,12 +77,12 @@ exports.createBusiness = catchAsync(async (req, res, next) => {
       }
     }
 
-    return { newBuisness, businessSlug };
+    return { newBusiness, businessSlug };
   });
 
   if (!operation) return res.status(400).json({ status: "error" });
 
-  res.status(201).json({ status: "success", data: result.newBuisness });
+  res.status(201).json({ status: "success", data: result.newBusiness });
 });
 
 // Get all Businesses
@@ -156,12 +160,20 @@ exports.getMenu = catchAsync(async (req, res, next) => {
 });
 
 exports.getMyQr = catchAsync(async (req, res, next) => {
-  const slug = `/${req.params.slug}`;
-
+  const { id } = req.user;
+  // let id = "96cb1341-5677-469b-a2d8-e90b03efbbf6";
   const myQr = await Slugs.findOne({
-    where: { slug },
-    include: [{ model: Business, attributes: ["qrcode"] }],
+    attributes: ["slug", "business_id"],
+    order: [["createdAt", "DESC"]],
+    include: [
+      {
+        model: Business,
+        attributes: ["qrcode", "is_published"],
+        where: { user_id: id },
+      },
+    ],
   });
+  console.log(myQr);
 
   res.status(200).json(myQr);
 });
@@ -171,15 +183,51 @@ exports.getMenuOnSlug = catchAsync(async (req, res, next) => {
 
   const myQrMenu = await Slugs.findOne({
     where: { slug },
+    attributes: [],
     include: [
       {
         model: Business,
-        attributes: ["qrcode", "logo", "banner", "businessName"],
-        include: { model: Categories, include: { model: Items } },
+        attributes: [
+          "is_published",
+          "qrcode",
+          "logo",
+          "banner",
+          "businessName",
+        ],
+        include: {
+          model: Categories,
+          include: {
+            model: Items,
+          },
+        },
       },
     ],
   });
 
-  const menu = myQrMenu.buisness;
-  res.status(200).json({ status: "success", menu });
+  if (!myQrMenu) {
+    return res.status(404).json({ message: "Menu not found" });
+  }
+  const published = myQrMenu.business;
+
+  if (published.is_published) {
+    return res.json(myQrMenu);
+  } else {
+    return res.json({
+      business: {
+        businessName: published.businessName,
+        logo: published.logo,
+      },
+    });
+  }
+});
+
+exports.published = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const publish = await Business.update(
+    {
+      is_published: true,
+    },
+    { where: { id } }
+  );
+  res.status(200).json(publish);
 });

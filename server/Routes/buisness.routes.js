@@ -10,6 +10,7 @@ const {
   getMenu,
   getMyQr,
   getMenuOnSlug,
+  published,
 } = require("../Controllers/buisnesses.controller");
 const { protect } = require("../Controllers/auth.controller");
 
@@ -40,7 +41,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// BusinessRouter.use(protect);
+BusinessRouter.use(protect);
 
 BusinessRouter.route("/")
   .post(
@@ -52,7 +53,7 @@ BusinessRouter.route("/")
   )
   .get(getAllBusinesses);
 
-BusinessRouter.route("/:id")
+BusinessRouter.route("business/:id")
   .get(getBusinessById)
   .patch(
     upload.fields([
@@ -64,7 +65,8 @@ BusinessRouter.route("/:id")
   .delete(deleteBusiness);
 
 BusinessRouter.route("/menu/:id").get(getMenu);
-BusinessRouter.get("/getMyQr/:slug", getMyQr);
+BusinessRouter.get("/getMyQr", getMyQr);
 BusinessRouter.get("/qr/:slug", getMenuOnSlug);
+BusinessRouter.get("/publish/:id", published);
 
 module.exports = BusinessRouter;

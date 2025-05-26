@@ -1,4 +1,4 @@
-const { Items } = require("../Models/index");
+const { Items, Categories } = require("../Models/index");
 const { catchAsync } = require("../Utils/catchAsync");
 
 // Create a new item
@@ -45,4 +45,15 @@ exports.deleteItem = catchAsync(async (req, res, next) => {
   res.status(204).json({ status: "success", data: null });
 });
 
-// exports.getItemsRestaurant = catchAsync(async);
+exports.getItemsByCategory = catchAsync(async (req, res, next) => {
+  const categories = await Categories.findAll({
+    where: { business_id: req.params.id },
+    attributes: ["id", "name"],
+    include: {
+      model: Items,
+      as: "Items",
+      attributes: ["id", "name", "description", "price"],
+    },
+  });
+  res.status(200).json({ status: "success", data: categories });
+});

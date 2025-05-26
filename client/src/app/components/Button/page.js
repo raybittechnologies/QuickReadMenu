@@ -1,10 +1,12 @@
 import React from "react";
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 
-const Button = ({ text, variant = "primary", className = "" }) => {
+const Button = ({ text, variant = "primary", className = "", onClick }) => {
   return (
     <StyledWrapper variant={variant} className={className}>
-      <button className={`btn ${variant}`}>{text}</button>
+      <button className={`btn ${variant}`} onClick={onClick}>
+        {text}
+      </button>
     </StyledWrapper>
   );
 };

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FaHome,
   FaUtensils,
@@ -17,6 +17,8 @@ import {
   FaBalanceScale,
 } from "react-icons/fa";
 import Button from "../components/Button/page";
+import { getCategories, getMyQr, getPublished, getQrMenu } from "../utils/api";
+// import { BASE_URI } from "../utils/constants";
 
 const tabs = [
   { id: "home", label: "Home", icon: FaHome },
@@ -79,6 +81,55 @@ const Profile = () => {
   const [selectedSubOption, setSelectedSubOption] = useState(null);
   const [addCategoryView, setAddCategoryView] = useState(false);
   const [selected, setSelected] = useState("Edit categories");
+  const [categories, setCategories] = useState([]);
+  const [qr, setQr] = useState(null);
+  const [qrDetails, setQRDetails] = useState(true);
+  const [publish, setPublish] = useState(false);
+  // console.log(localStorage.getItem("token"));
+
+  const fetchCategories = async () => {
+    try {
+      const response = await getCategories(qrDetails.business_id);
+      setCategories(response.data.data);
+      console.log(response.data.data);
+    } catch (error) {
+      console.error("Failed to fetch categories", error);
+    }
+  };
+
+  useEffect(() => {
+    const getMyQrs = async () => {
+      try {
+        const response = await getMyQr();
+        console.log(response.data);
+        const fullQrUrl = `http://localhost:5050${response.data.business.qrcode}`;
+        setQr(fullQrUrl);
+        setQRDetails(response.data);
+        // console.log(response.data.business_id);
+      } catch (error) {
+        console.error("Failed to fetch qr", error);
+      }
+    };
+
+    getMyQrs();
+  }, []);
+
+  const handlePublished = async () => {
+    try {
+      const response = await getPublished(qrDetails.business_id);
+      console.log(qrDetails);
+
+      if (response.status === 200) {
+        setPublish(true);
+      } else {
+        setPublish(false);
+      }
+
+      console.log("Publish status:", response?.data?.is_published);
+    } catch (error) {
+      console.error("Failed to fetch published", error);
+    }
+  };
 
   const options = [
     "Edit categories",
@@ -151,17 +202,23 @@ const Profile = () => {
 
             {/* QR Section */}
             <div className="bg-white shadow rounded-lg p-4 flex flex-col md:flex-row items-center justify-between gap-4">
-              <img
-                src="https://img.freepik.com/free-vector/scan-me-qr-code_78370-2915.jpg"
-                alt="QR Code"
-                className="w-28 h-28"
-              />
+              {qr ? (
+                <img src={qr} alt="QR Code" className="w-28 h-28" />
+              ) : (
+                <p>Loading QR...</p>
+              )}
               <div className="flex-1 md:text-left">
                 <p className="text-sm text-gray-600 mb-4">
                   This is the QR code that links to your menu’s home page with
                   categories.
                 </p>
-                <Button text="Publish" variant="secondary" />
+                {!publish && (
+                  <Button
+                    text="Publish"
+                    variant="secondary"
+                    onClick={handlePublished}
+                  />
+                )}
               </div>
             </div>
 
@@ -234,14 +291,14 @@ const Profile = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {["Main", "Dessert", "Beverage"].map((category) => (
-                      <tr key={category} className=" hover:bg-gray-50">
+                    {categories.map((category) => (
+                      <tr key={category.id} className=" hover:bg-gray-50">
                         <td className="p-4">
                           <input type="checkbox" />
                         </td>
                         <td className="p-4 flex items-center gap-2">
                           <span className="text-md font-semibold">
-                            {category}
+                            {category.name}
                           </span>
                         </td>
                         <td className="p-4">
@@ -290,10 +347,12 @@ const Profile = () => {
               {/* Filters */}
               <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
                 <select className="border text-sm px-3 py-2 rounded-md">
-                  <option>All categories</option>
-                  <option>Chinese</option>
-                  <option>North Indian</option>
-                  <option>Wazwaan</option>
+                  <option value="">All categories</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
                 </select>
                 <input
                   type="text"
@@ -315,30 +374,28 @@ const Profile = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {[
-                      { name: "New2", price: 234 },
-                      { name: "New", price: 12 },
-                      { name: "Coke", price: 3 },
-                    ].map((product) => (
-                      <tr key={product.name} className="hover:bg-gray-50">
-                        <td className="p-4">
-                          <input type="checkbox" />
-                        </td>
-                        <td className="p-4 flex items-center gap-3">
-                          <div>
-                            <div className="font-medium">{product.name}</div>
-                            <div className="text-xs text-gray-500">
-                              &#8377; {product.price}
+                    {categories.map((category) =>
+                      category.Items?.map((item) => (
+                        <tr key={item.id} className="hover:bg-gray-50">
+                          <td className="p-4">
+                            <input type="checkbox" />
+                          </td>
+                          <td className="p-4 flex items-center gap-3">
+                            <div>
+                              <div className="font-medium">{item.name}</div>
+                              <div className="text-xs text-gray-500">
+                                ₹ {item.price}
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="p-4">
-                          <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
-                            Active
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                          <td className="p-4">
+                            <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
+                              Active
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -497,6 +554,8 @@ const Profile = () => {
                           onClick={() => {
                             setActiveTab("menu");
                             setSelectedSubOption(subLabel);
+                            fetchCategories();
+
                             setAddCategoryView(subLabel === "Add Category");
                           }}
                           className="ml-4 flex items-center gap-4 text-left text-sm text-gray-600 hover:text-[#6220fb] py-2"

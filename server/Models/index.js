@@ -26,7 +26,7 @@ associations(db);
   try {
     await sequelize.authenticate();
     // await sequelize.sync({ force: true });
-    // await db.User.sync({ alter: true });
+    // await db.Business.sync({ alter: true });
     console.log("DB Connection has been established successfully.");
   } catch (error) {
     console.error("Unable to connect to the database:", error);

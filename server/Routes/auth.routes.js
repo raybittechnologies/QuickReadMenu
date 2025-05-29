@@ -7,7 +7,7 @@ const {
 } = require("../Controllers/auth.controller");
 
 AuthRouter.route("/signup").post(signUp);
-AuthRouter.route("/login").get(login);
+AuthRouter.route("/login").post(login);
 AuthRouter.route("/google/signup").get(googleSignUp);
 AuthRouter.get("/gCallback", googleCallback);
 module.exports = AuthRouter;

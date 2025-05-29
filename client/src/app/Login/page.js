@@ -1,31 +1,88 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { IconBrandGoogle } from "@tabler/icons-react";
 import { Input } from "../components/Input/page";
 import { Label } from "../components/Label/page";
 import { cn } from "../utils/util";
+import toast from "react-hot-toast";
+import { BASE_URI } from "../utils/constants";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginForm() {
-  const handleSubmit = (e) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const router = useRouter();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted");
+    try {
+      const res = await fetch(`${BASE_URI}/api/v1/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.message || "Login failed.");
+        return;
+      }
+
+      const userInfo = {
+        id: data.user.id,
+        email: data.user.email,
+        isActive: data.user.isActive,
+      };
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(userInfo));
+
+      toast.success("Login successful!");
+      router.push(`/createBusiness/${data.token}`);
+    } catch (err) {
+      console.error("Login error:", err);
+      toast.error("Something went wrong. Please try again.");
+    }
   };
+
+  const googleLogin = () => {
+    window.location.href = "http://localhost:5050/api/v1/auth/google/signUp";
+  };
+
   return (
     <div className="shadow-input mt-20 mx-auto max-w-md rounded-none bg-[#6220fb] p-4 md:rounded-2xl md:p-8">
       <h2 className="text-center text-xl font-bold text-white">
         Welcome to Menu
       </h2>
-      <p className="text-center mt-2 max-w-sm text-sm text-white ">
+      <p className="text-center mt-2 max-w-sm text-sm text-white">
         Login to continue
       </p>
-      <form className="my-8" onSubmit={handleSubmit}>
-        <LabelInputContainer className="mb-4">
+      <form className="my-4" onSubmit={handleSubmit}>
+        <LabelInputContainer>
           <Label htmlFor="email">Email Address</Label>
-          <Input id="email" placeholder="raybit@menu.com" type="email" />
+          <Input
+            id="email"
+            placeholder="raybit@menu.com"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
         </LabelInputContainer>
-        <LabelInputContainer className="mb-4">
+        <LabelInputContainer className="mt-4">
           <Label htmlFor="password">Password</Label>
-          <Input id="password" placeholder="••••••••" type="password" />
+          <Input
+            id="password"
+            placeholder="••••••••"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
         </LabelInputContainer>
 
         <button
@@ -41,12 +98,20 @@ export default function LoginForm() {
         <div className="flex flex-col space-y-4">
           <button
             className="group/btn shadow-input relative flex h-10 w-full items-center justify-center space-x-2 rounded-md bg-white px-4 font-medium text-black"
-            type="submit"
+            type="button"
+            onClick={googleLogin}
           >
             <IconBrandGoogle className="h-4 w-4 text-black" />
             <span className="text-sm text-black">Continue with Google</span>
             <BottomGradient />
           </button>
+          <div className="flex items-center justify-center">
+            <Link href="/signup">
+              <span className="text-md font-medium text-white hover:text-black underline hover:underline-offset-2 transition duration-200">
+                Don’t have an account?
+              </span>
+            </Link>
+          </div>
         </div>
       </form>
     </div>

@@ -38,6 +38,37 @@ export const getCategories = async (id) => {
     },
   });
 };
+export const addNewCategory = async (data) => {
+  const token = localStorage.getItem("token");
+
+  return await api.post(`${BASE_URI}/categories`, data, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const addNewProduct = async (data) => {
+  const token = localStorage.getItem("token");
+
+  return await api.post(`${BASE_URI}/items`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const deleteCategory = async (id) => {
+  const token = localStorage.getItem("token");
+
+  return await api.delete(`${BASE_URI}/categories/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
 
 export const getMyQr = async () => {
   const token = localStorage.getItem("token");

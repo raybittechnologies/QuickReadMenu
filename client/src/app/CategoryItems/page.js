@@ -13,7 +13,8 @@ export default function CategoryItemsManager({
   const router = useRouter();
   const handleContinue = () => {
     const token = localStorage.getItem("token");
-    router.push(token ? `/createBusiness/${token}` : "/signup");
+    router.push(token ? `/createBusiness/${token}` : "/Login");
+    // router.push("/createBusiness");
   };
 
   const [selectedCategory, setSelectedCategory] = useState("");

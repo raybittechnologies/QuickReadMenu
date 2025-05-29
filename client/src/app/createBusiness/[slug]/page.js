@@ -1,93 +1,135 @@
-"use client"; // Only needed in app router
+"use client";
 
 import { register } from "@/app/utils/api";
 import { useSearchParams } from "next/navigation";
 import { use, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
+import { BASE_URI } from "@/app/utils/constants";
 
-export default function createBusiness({ params }) {
+export default function CreateBusiness({ params }) {
   const { slug } = use(params);
+  const router = useRouter();
+
   const urlToFile = async (url, filename, mimeType) => {
     const res = await fetch(url);
     const blob = await res.blob();
     return new File([blob], filename, { type: mimeType });
   };
-  const router = useRouter();
+
+  // useEffect(() => {
+  //   const token = localStorage.getItem("token");
+
+  //   const checkUserLoggedIn = async () => {
+  //     if (!token) return;
+
+  //     try {
+  //       const res = await axios.get(`${BASE_URI}/api/v1/auth/login`, {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       });
+
+  //       if (res?.data?.user) {
+  //         router.push("/UserProfile");
+  //       }
+  //     } catch (err) {
+  //       console.warn("Token invalid or user not logged in.");
+  //     }
+  //   };
+
+  //   checkUserLoggedIn();
+  // }, []);
+
   useEffect(() => {
-    console.log("Token:", slug);
     if (slug) {
       localStorage.setItem("token", slug);
     }
-  }, []);
+  }, [slug]);
+
   useEffect(() => {
     const generateAndSend = async () => {
-      const payload = {};
-      payload.type = sessionStorage.getItem("selectedType");
-      payload.country = sessionStorage.getItem("selectedCountry");
-      payload.language = sessionStorage.getItem("selectedLanguage");
-      payload.business = JSON.parse(sessionStorage.getItem("selectedBusiness"));
-      payload.details = JSON.parse(sessionStorage.getItem("businessDetails"));
-      payload.storedLogo = sessionStorage.getItem("customLogo");
-      payload.storedBanner = sessionStorage.getItem("customBanner");
-      payload.storedCategories = JSON.parse(
-        sessionStorage.getItem("menuCategories")
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const requiredKeys = [
+        "selectedType",
+        "selectedCountry",
+        "selectedLanguage",
+        "selectedBusiness",
+        "businessDetails",
+        "customLogo",
+        "customBanner",
+        "menuCategories",
+        "items",
+      ];
+
+      // Redirect if any required sessionStorage item is missing
+      const isMissingData = requiredKeys.some(
+        (key) => !sessionStorage.getItem(key)
       );
-      payload.items = JSON.parse(sessionStorage.getItem("items"));
-      const asliPayload = {};
-      asliPayload.businessName = payload.business.name;
-      asliPayload.businessType = payload.type;
-      asliPayload.country = payload.details.country;
-      asliPayload.language = payload.language;
-      asliPayload.address = payload.details.address;
-      asliPayload.add_city = payload.details.city;
-      asliPayload.add_country = payload.details.country;
-      asliPayload.add_zip = payload.details.pincode;
-      asliPayload.add_phone = "9906990600";
-      asliPayload.logo = payload.storedLogo;
-      asliPayload.banner = payload.storedBanner;
-      asliPayload.categories = payload.storedCategories;
-      asliPayload.items = payload.items;
-      console.log(asliPayload);
+      if (isMissingData) {
+        router.push("/UserProfile");
+        return;
+      }
+
+      const payload = {
+        type: sessionStorage.getItem("selectedType"),
+        country: sessionStorage.getItem("selectedCountry"),
+        language: sessionStorage.getItem("selectedLanguage"),
+        business: JSON.parse(sessionStorage.getItem("selectedBusiness")),
+        details: JSON.parse(sessionStorage.getItem("businessDetails")),
+        storedLogo: sessionStorage.getItem("customLogo"),
+        storedBanner: sessionStorage.getItem("customBanner"),
+        storedCategories: JSON.parse(sessionStorage.getItem("menuCategories")),
+        items: JSON.parse(sessionStorage.getItem("items")),
+      };
 
       const formData = new FormData();
-      // Add simple fields
+      const asliPayload = {
+        businessName: payload.business.name,
+        businessType: payload.type,
+        country: payload.details.country,
+        language: payload.language,
+        address: payload.details.address,
+        add_city: payload.details.city,
+        add_country: payload.details.country,
+        add_zip: payload.details.pincode,
+        add_phone: "9906990600",
+        logo: payload.storedLogo,
+        banner: payload.storedBanner,
+        categories: payload.storedCategories,
+        items: payload.items,
+      };
+
       for (const key in asliPayload) {
-        if (
-          key !== "items" &&
-          key !== "categories" &&
-          key !== "logo" &&
-          key !== "banner"
-        ) {
+        if (!["items", "categories", "logo", "banner"].includes(key)) {
           formData.append(key, asliPayload[key]);
         }
       }
 
-      let logoFile = null;
-      let bannerFile = null;
-
-      // Check if logo is a base64 image (indicating it's uploaded)
       if (payload.storedLogo?.startsWith("data:image")) {
-        logoFile = await urlToFile(payload.storedLogo, "logo.png", "image/png");
+        const logoFile = await urlToFile(
+          payload.storedLogo,
+          "logo.png",
+          "image/png"
+        );
+        formData.append("logo", logoFile);
       }
 
-      // Check if banner is a base64 image (indicating it's uploaded)
       if (payload.storedBanner?.startsWith("data:image")) {
-        bannerFile = await urlToFile(
+        const bannerFile = await urlToFile(
           payload.storedBanner,
           "banner.png",
           "image/png"
         );
+        formData.append("banner", bannerFile);
       }
 
-      formData.append("logo", logoFile);
-      formData.append("banner", bannerFile);
-
-      // Handle categories array
       asliPayload.categories.forEach((category, index) => {
         formData.append(`categories[${index}]`, category);
       });
 
-      // Handle nested items object
       for (const category in asliPayload.items) {
         asliPayload.items[category].forEach((item, index) => {
           formData.append(`items[${category}][${index}][name]`, item.name);
@@ -99,21 +141,22 @@ export default function createBusiness({ params }) {
         });
       }
 
-      register(formData)
-        .then((res) => {
-          console.log("Response:", res.data);
-          router.push("/UserProfile");
-        })
-        .catch((err) => {
-          console.error("Error:", err);
-          // Handle error (e.g., show an error message)
-        });
+      try {
+        const res = await register(formData);
+        console.log("Business created:", res.data);
+        router.push("/UserProfile");
+      } catch (err) {
+        console.error("Business creation failed:", err);
+      }
     };
 
-    // Only run in browser (where sessionStorage is available)
-    if (typeof window !== "undefined") {
-      generateAndSend();
-    }
+    const timeout = setTimeout(() => {
+      if (typeof window !== "undefined" && localStorage.getItem("token")) {
+        generateAndSend();
+      }
+    }, 300);
+
+    return () => clearTimeout(timeout);
   }, []);
 
   return (

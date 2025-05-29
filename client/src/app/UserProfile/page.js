@@ -17,7 +17,20 @@ import {
   FaBalanceScale,
 } from "react-icons/fa";
 import Button from "../components/Button/page";
-import { getCategories, getMyQr, getPublished, getQrMenu } from "../utils/api";
+import {
+  addNewCategory,
+  addNewProduct,
+  deleteCategory,
+  getCategories,
+  getMyQr,
+  getPublished,
+  getQrMenu,
+} from "../utils/api";
+import AddCategoryModal from "../components/Modals/categorymodal";
+import AddProductModal from "../components/Modals/addProductModal";
+import { BASE_URI } from "../utils/constants";
+import { useRouter } from "next/navigation";
+import LogoutConfirmationModal from "../components/Modals/logoutModal";
 // import { BASE_URI } from "../utils/constants";
 
 const tabs = [
@@ -85,7 +98,10 @@ const Profile = () => {
   const [qr, setQr] = useState(null);
   const [qrDetails, setQRDetails] = useState(true);
   const [publish, setPublish] = useState(false);
-  // console.log(localStorage.getItem("token"));
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const router = useRouter();
+  const [isModalOpen, setModalOpen] = useState(false);
 
   const fetchCategories = async () => {
     try {
@@ -96,13 +112,58 @@ const Profile = () => {
       console.error("Failed to fetch categories", error);
     }
   };
+  const filteredCategories = categories.filter((cat) =>
+    cat.name.toLowerCase().includes(searchQuery)
+  );
+
+  const addCategory = async (categoryName) => {
+    try {
+      const payload = {
+        name: categoryName,
+        business_id: qrDetails.business_id,
+      };
+
+      await addNewCategory(payload);
+      await fetchCategories();
+      setModalOpen(false);
+    } catch (error) {
+      console.error("Failed to add category", error);
+    }
+  };
+
+  const addProduct = async (product) => {
+    try {
+      const payload = {
+        name: product.name,
+        price: product.price,
+        description: product.description,
+        category_id: product.categoryId,
+        business_id: qrDetails.business_id,
+      };
+
+      await addNewProduct(payload);
+      await fetchProducts();
+      setProductModalOpen(false);
+    } catch (error) {
+      console.error("Failed to add product", error);
+    }
+  };
+
+  const handleDelete = async (categoryId) => {
+    try {
+      await deleteCategory(categoryId);
+      await fetchCategories();
+    } catch (error) {
+      console.error("Failed to delete category", error);
+    }
+  };
 
   useEffect(() => {
     const getMyQrs = async () => {
       try {
         const response = await getMyQr();
         console.log(response.data);
-        const fullQrUrl = `http://localhost:5050${response.data.business.qrcode}`;
+        const fullQrUrl = `${BASE_URI}${response.data.business.qrcode}`;
         setQr(fullQrUrl);
         setQRDetails(response.data);
         // console.log(response.data.business_id);
@@ -131,18 +192,17 @@ const Profile = () => {
     }
   };
 
-  const options = [
-    "Edit categories",
-    "Add product",
-    "Edit business profile",
-    "Add logo and banner",
-  ];
+  // const options = ["Add categories", "Add products", "Edit business profile"];
 
   const handleSelect = (option) => {
     setSelected(option === selected ? "" : option);
   };
 
   const handleTabClick = (id, hasSubOptions) => {
+    if (id === "logout") {
+      setShowLogoutModal(true);
+      return;
+    }
     if (hasSubOptions) {
       setExpandedTab(expandedTab === id ? null : id);
       setActiveTab(id);
@@ -151,6 +211,18 @@ const Profile = () => {
       setExpandedTab(null);
       setSelectedSubOption(null);
       setAddCategoryView(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    console.log("Logout clicked");
+    try {
+      localStorage.removeItem("token");
+      sessionStorage.clear();
+      setShowLogoutModal(false);
+      router.push("/Login");
+    } catch (error) {
+      console.error("Logout failed:", error);
     }
   };
 
@@ -201,29 +273,42 @@ const Profile = () => {
             </div>
 
             {/* QR Section */}
-            <div className="bg-white shadow rounded-lg p-4 flex flex-col md:flex-row items-center justify-between gap-4">
-              {qr ? (
-                <img src={qr} alt="QR Code" className="w-28 h-28" />
-              ) : (
-                <p>Loading QR...</p>
-              )}
-              <div className="flex-1 md:text-left">
-                <p className="text-sm text-gray-600 mb-4">
-                  This is the QR code that links to your menu’s home page with
-                  categories.
-                </p>
-                {!publish && (
-                  <Button
-                    text="Publish"
-                    variant="secondary"
-                    onClick={handlePublished}
-                  />
+            {qr ? (
+              <div className="bg-white shadow rounded-lg p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+                {qr ? (
+                  <img src={qr} alt="QR Code" className="w-28 h-28" />
+                ) : (
+                  <p>Loading QR...</p>
                 )}
+                <div className="flex-1 md:text-left">
+                  <p className="text-sm text-gray-600 mb-4">
+                    This is the QR code that links to your menu’s home page with
+                    categories.
+                  </p>
+                  {!publish && (
+                    <Button
+                      text="Publish"
+                      variant="secondary"
+                      onClick={handlePublished}
+                    />
+                  )}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-white shadow rounded-lg p-6 flex items-center justify-between">
+                <p className="text-gray-700 text-sm">
+                  You haven't created your business yet.
+                </p>
+                <Button
+                  text="Get Started"
+                  variant="primary"
+                  onClick={() => router.push("/getStarted")}
+                />
+              </div>
+            )}
 
             {/* Checklist */}
-            <div className="bg-white shadow rounded-lg p-4">
+            {/* <div className="bg-white shadow rounded-lg p-4">
               <h3 className="font-semibold text-lg mb-4">
                 You are off to a great start
               </h3>
@@ -245,232 +330,250 @@ const Profile = () => {
                   className="w-full"
                 />
               </div>
-            </div>
+            </div> */}
           </div>
         );
       case "menu":
-        if (addCategoryView) {
-          return (
-            <div className="space-y-4">
-              <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 justify-between">
-                <h2 className="text-lg font-semibold">Categories</h2>
-                <Button text=" Add Category" variant="primary" />
-              </div>
-
-              <div className="flex space-x-4 pb-2">
-                {["All", "Active", "Draft"].map((tab) => (
-                  <button
-                    key={tab}
-                    className={`text-md ${
-                      tab === "All"
-                        ? "border-b-2 border-[#6220fb] text-[#6220fb] font-semibold"
-                        : "text-gray-600"
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                ))}
-              </div>
-
-              <div className="bg-white shadow rounded-lg overflow-x-auto">
-                <div className="p-4">
-                  <input
-                    type="text"
-                    placeholder="Search"
-                    className="border px-3 py-2 rounded-md text-sm w-full md:w-1/2"
+        switch (selectedSubOption) {
+          case "Add Category":
+            return (
+              <div className="space-y-4">
+                <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 justify-between">
+                  <h2 className="text-lg font-semibold">Categories</h2>
+                  <Button
+                    text="Add Category"
+                    variant="primary"
+                    onClick={() => setModalOpen(true)}
+                  />
+                  <AddCategoryModal
+                    isOpen={isModalOpen}
+                    onClose={() => setModalOpen(false)}
+                    onSubmit={addCategory}
                   />
                 </div>
-                <table className="min-w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-[#6220fb] bg-gray-50 text-gray-600 text-left">
-                      <th className="p-4">
-                        <input type="checkbox" />
-                      </th>
-                      <th className="p-4">Categories</th>
-                      <th className="p-4">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {categories.map((category) => (
-                      <tr key={category.id} className=" hover:bg-gray-50">
-                        <td className="p-4">
-                          <input type="checkbox" />
-                        </td>
-                        <td className="p-4 flex items-center gap-2">
-                          <span className="text-md font-semibold">
-                            {category.name}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
-                            Active
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          );
-        }
-        if (selectedSubOption === "Add Product") {
-          return (
-            <div className="space-y-8">
-              {/* Top Controls */}
-              <div className="flex justify-between items-center">
-                <div className="flex flex-col md:flex-row gap-4">
-                  <div className="flex items-center">
-                    <Button text="Import" variant="secondary" />
-                    <Button text="Export" variant="secondary" />
-                  </div>
-                  <Button text=" Add Product" variant="primary" />
-                </div>
-              </div>
 
-              {/* Tabs */}
-              <div className="flex space-x-6 text-sm">
-                {["All", "Active", "Draft"].map((tab, index) => (
-                  <button
-                    key={tab}
-                    className={`pb-2 ${
-                      index === 0
-                        ? "border-b-2 border-[#6220fb] text-[#6220fb] font-medium"
-                        : "text-gray-600"
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                ))}
-              </div>
-
-              {/* Filters */}
-              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-                <select className="border text-sm px-3 py-2 rounded-md">
-                  <option value="">All categories</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.name}>
-                      {cat.name}
-                    </option>
+                <div className="flex space-x-4 pb-2">
+                  {["All", "Active"].map((tab) => (
+                    <button
+                      key={tab}
+                      className={`text-md ${
+                        tab === "All"
+                          ? "border-b-2 border-[#6220fb] text-[#6220fb] font-semibold"
+                          : "text-gray-600"
+                      }`}
+                    >
+                      {tab}
+                    </button>
                   ))}
-                </select>
-                <input
-                  type="text"
-                  placeholder="Search"
-                  className="border px-3 py-2 rounded-md text-sm flex-1 w-full"
-                />
-              </div>
+                </div>
 
-              {/* Product Table */}
-              <div className="bg-white shadow rounded-lg overflow-x-auto">
-                <table className="min-w-full text-sm">
-                  <thead>
-                    <tr className="text-left border-b border-[#6220fb] bg-gray-50 text-gray-600">
-                      <th className="p-4">
-                        <input type="checkbox" />
-                      </th>
-                      <th className="p-4">Products</th>
-                      <th className="p-4">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {categories.map((category) =>
-                      category.Items?.map((item) => (
-                        <tr key={item.id} className="hover:bg-gray-50">
-                          <td className="p-4">
-                            <input type="checkbox" />
-                          </td>
-                          <td className="p-4 flex items-center gap-3">
-                            <div>
-                              <div className="font-medium">{item.name}</div>
-                              <div className="text-xs text-gray-500">
-                                ₹ {item.price}
-                              </div>
-                            </div>
+                <div className="bg-white shadow rounded-lg overflow-x-auto">
+                  <div className="p-4">
+                    <input
+                      type="text"
+                      placeholder="Search for categories"
+                      value={searchQuery}
+                      onChange={(e) =>
+                        setSearchQuery(e.target.value.toLowerCase())
+                      }
+                      className="border px-3 py-2 rounded-md text-sm w-full md:w-1/2"
+                    />
+                  </div>
+                  <table className="min-w-full text-md">
+                    <thead>
+                      <tr className="border-b border-[#6220fb] bg-gray-50 text-gray-600 text-left">
+                        <th className="p-4">Categories</th>
+                        <th className="p-4">Status</th>
+                        <th className="p-4">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredCategories.map((category) => (
+                        <tr key={category.id} className=" hover:bg-gray-50">
+                          <td className="p-4 flex items-center gap-2">
+                            <span className="text-md font-semibold">
+                              {category.name}
+                            </span>
                           </td>
                           <td className="p-4">
                             <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
                               Active
                             </span>
                           </td>
+                          <td className="p-4">
+                            <span
+                              onClick={() => handleDelete(category.id)}
+                              className="bg-red-100 cursor-pointer text-red-700 text-xs px-2 py-1 rounded-full"
+                            >
+                              Delete
+                            </span>
+                          </td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          );
-        }
-        if (selectedSubOption === "Customize") {
-          return (
-            <div className="space-y-8">
-              <span className="text-xl">{selectedSubOption}</span>
-              <div className="space-y-6">
-                {/* Logo and Main Banner Upload */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                  <div className="bg-white shadow rounded-lg p-4">
-                    <h3 className="font-semibold mb-2">Logo</h3>
-                    <img
-                      src="https://raybittechnologies.com/wp-content/uploads/2024/03/logoraybit-new.png"
-                      alt="logo"
-                      className="w-auto h-20 mb-4"
-                    />
-                    <Button text="Edit & Replace" variant="secondary" />
-                  </div>
-                  <div className="bg-white shadow rounded-lg p-4">
-                    <h3 className="font-semibold mb-2">Main banner</h3>
-                    <img
-                      src="https://raybittechnologies.com/wp-content/uploads/2024/03/logoraybit-new.png"
-                      alt="logo"
-                      className="w-auto h-20 mb-4"
-                    />
-                    <Button text="Edit & Replace" variant="secondary" />
-                  </div>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
+              </div>
+            );
 
-                {/* Social Media Links */}
-                <div className="bg-white shadow rounded-lg p-4">
-                  <h3 className="font-semibold mb-4">Social Media</h3>
-                  {[
-                    "Twitter",
-                    "Facebook",
-                    "Instagram",
-                    "Pinterest",
-                    "YouTube",
-                    "Trip Advisor",
-                  ].map((platform) => (
-                    <div key={platform} className="mb-3">
-                      <label className="block text-sm font-medium mb-1">
-                        {platform}
-                      </label>
-                      <input
-                        type="text"
-                        placeholder={`${platform.toLowerCase()} profile`}
-                        className="w-full border px-3 py-2 rounded text-sm"
-                      />
+          case "Add Product":
+            return (
+              <div className="space-y-8">
+                <div className="flex justify-between items-center">
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <div className="flex items-center">
+                      <Button text="Import" variant="secondary" />
+                      <Button text="Export" variant="secondary" />
                     </div>
+                    <Button
+                      text="Add Product"
+                      variant="primary"
+                      onClick={() => setModalOpen(true)}
+                    />
+                    <AddProductModal
+                      isOpen={isModalOpen}
+                      onClose={() => setModalOpen(false)}
+                      onSubmit={addProduct}
+                      categories={categories}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex space-x-6 text-sm">
+                  {["All", "Active", "Draft"].map((tab, index) => (
+                    <button
+                      key={tab}
+                      className={`pb-2 ${
+                        index === 0
+                          ? "border-b-2 border-[#6220fb] text-[#6220fb] font-medium"
+                          : "text-gray-600"
+                      }`}
+                    >
+                      {tab}
+                    </button>
                   ))}
-                  <Button text="Save" variant="primary" />
+                </div>
+
+                <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+                  <select className="border text-sm px-3 py-2 rounded-md">
+                    <option value="">All categories</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.name}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="Search"
+                    className="border px-3 py-2 rounded-md text-sm flex-1 w-full"
+                  />
+                </div>
+
+                <div className="bg-white shadow rounded-lg overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="text-left border-b border-[#6220fb] bg-gray-50 text-gray-600">
+                        <th className="p-4">
+                          <input type="checkbox" />
+                        </th>
+                        <th className="p-4">Products</th>
+                        <th className="p-4">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {categories.map((category) =>
+                        category.Items?.map((item) => (
+                          <tr key={item.id} className="hover:bg-gray-50">
+                            <td className="p-4">
+                              <input type="checkbox" />
+                            </td>
+                            <td className="p-4 flex items-center gap-3">
+                              <div>
+                                <div className="font-medium">{item.name}</div>
+                                <div className="text-xs text-gray-500">
+                                  ₹ {item.price}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="p-4">
+                              <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
+                                Active
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-            </div>
-          );
+            );
+
+          case "Customize":
+            return (
+              <div className="space-y-8">
+                <span className="text-xl">{selectedSubOption}</span>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    <div className="bg-white shadow rounded-lg p-4">
+                      <h3 className="font-semibold mb-2">Logo</h3>
+                      <img
+                        src="https://raybittechnologies.com/wp-content/uploads/2024/03/logoraybit-new.png"
+                        alt="logo"
+                        className="w-auto h-20 mb-4"
+                      />
+                      <Button text="Edit & Replace" variant="secondary" />
+                    </div>
+                    <div className="bg-white shadow rounded-lg p-4">
+                      <h3 className="font-semibold mb-2">Main banner</h3>
+                      <img
+                        src="https://raybittechnologies.com/wp-content/uploads/2024/03/logoraybit-new.png"
+                        alt="logo"
+                        className="w-auto h-20 mb-4"
+                      />
+                      <Button text="Edit & Replace" variant="secondary" />
+                    </div>
+                  </div>
+
+                  <div className="bg-white shadow rounded-lg p-4">
+                    <h3 className="font-semibold mb-4">Social Media</h3>
+                    {[
+                      "Twitter",
+                      "Facebook",
+                      "Instagram",
+                      "Pinterest",
+                      "YouTube",
+                      "Trip Advisor",
+                    ].map((platform) => (
+                      <div key={platform} className="mb-3">
+                        <label className="block text-sm font-medium mb-1">
+                          {platform}
+                        </label>
+                        <input
+                          type="text"
+                          placeholder={`${platform.toLowerCase()} profile`}
+                          className="w-full border px-3 py-2 rounded text-sm"
+                        />
+                      </div>
+                    ))}
+                    <Button text="Save" variant="primary" />
+                  </div>
+                </div>
+              </div>
+            );
+
+          default:
+            return (
+              <div className="space-y-4">
+                <h2 className="text-lg font-semibold">Menu Management</h2>
+                <p className="text-sm text-gray-500">
+                  Please select an option from the submenu.
+                </p>
+              </div>
+            );
         }
 
-        return (
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Menu Management</h2>
-            {selectedSubOption && (
-              <p className="text-sm">You selected: {selectedSubOption}</p>
-            )}
-          </div>
-        );
-
-      case "myMenus":
-        return <div>📑 My Menus Content</div>;
-      case "account":
-        return <div>👤 My Account Content</div>;
       case "settings":
         return (
           <div className="">
@@ -496,8 +599,7 @@ const Profile = () => {
             </div>
           </div>
         );
-      case "logout":
-        return <div>🔓 Logging out...</div>;
+
       default:
         return <div>Choose a tab</div>;
     }
@@ -589,6 +691,11 @@ const Profile = () => {
               </button>
             ))}
         </div>
+        <LogoutConfirmationModal
+          isOpen={showLogoutModal}
+          onClose={() => setShowLogoutModal(false)}
+          onConfirm={handleLogout}
+        />
       </div>
 
       {/* Main Content */}

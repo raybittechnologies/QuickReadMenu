@@ -281,7 +281,7 @@ export default function LandingPage() {
               <h4 className="font-semibold mb-2">Company</h4>
               <ul className="space-y-1">
                 <li>
-                  <a href="/Signup" className="hover:underline">
+                  <a href="/signup" className="hover:underline">
                     Signup
                   </a>
                 </li>

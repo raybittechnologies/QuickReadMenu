@@ -70,7 +70,7 @@ exports.login = catchAsync(async (req, res, next) => {
   if (!isPasswordValid) {
     return res.status(404).json({ message: "Invalid credentials" });
   }
-  const token = await createSendToken(res, req, email);
+  const token = await createSendToken(res, req, { email: email });
 
   res.status(200).json({
     status: "Success",
@@ -86,6 +86,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   const users = await User.findOne({
     where: { email: tokenUser.data.email },
   });
+  console.log("Token User:", tokenUser.data.email);
   req.user = {
     id: users.id,
     email: users.email,
@@ -96,9 +97,13 @@ exports.protect = catchAsync(async (req, res, next) => {
 exports.signUp = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
-  await User.create({ email, password });
-
-  successResponse(res, "SignUp successfull", { email, password });
+  const user = await User.create({ email, password });
+  const token = await createSendToken(res, req, { email: email });
+  res.status(200).json({
+    status: "Success",
+    user,
+    token,
+  });
 });
 
 exports.googleSignUp = (req, res, next) =>

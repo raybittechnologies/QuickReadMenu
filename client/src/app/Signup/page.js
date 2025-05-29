@@ -1,39 +1,56 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { IconBrandGoogle } from "@tabler/icons-react";
 import { Input } from "../components/Input/page";
 import { Label } from "../components/Label/page";
 import { cn } from "../utils/util";
+import { BASE_URI } from "../utils/constants";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function SignupForm() {
-  // const [email, setEmail] = useState("");
-  // const [password, setPassword] = useState("");
-  // const router = useRouter();
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
+  const showToast = (msg) => {
+    setErrorMessage(msg);
+    setTimeout(() => setErrorMessage(""), 3000);
+  };
 
-  //   try {
-  //     const res = await fetch("http://localhost:5050/api/v1/auth/signup", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ email, password }),
-  //     });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  //     if (!res.ok) throw new Error("Signup failed");
+    try {
+      const res = await fetch(`${BASE_URI}/api/v1/auth/signUp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-  //     const data = await res.json();
+      const data = await res.json();
 
-  //     localStorage.setItem("user", JSON.stringify(data));
+      if (!res.ok) {
+        const errorMessage =
+          data?.message?.[0]?.message || "Signup failed. Please try again.";
+        throw new Error(errorMessage);
+      }
 
-  //     router.push("/userprofile");
-  //   } catch (err) {
-  //     console.error("Signup error:", err);
-  //     alert("Signup failed. Please try again.");
-  //   }
-  // };
+      const { user, token } = data;
+
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("token", token);
+
+      router.push(`/createBusiness/${token}`);
+    } catch (err) {
+      console.error("Signup error:", err);
+      showToast(err.message || "An unknown error occurred during signup.");
+    }
+  };
+
   const googleLogin = () => {
     window.location.href = "http://localhost:5050/api/v1/auth/google/signup";
   };
@@ -45,18 +62,35 @@ export default function SignupForm() {
       <p className="text-center mt-2 max-w-sm text-sm text-white ">
         Signup to continue
       </p>
-      <form className="my-8">
+      {errorMessage && (
+        <div className="mb-4 text-sm text-red-600 bg-red-100 p-2 rounded-md">
+          {errorMessage}
+        </div>
+      )}
+      <form className="my-8" onSubmit={handleSubmit}>
         <LabelInputContainer className="mb-4">
           <Label htmlFor="email">Email Address</Label>
-          <Input id="email" placeholder="raybit@menu.com" type="email" />
+          <Input
+            id="email"
+            placeholder="raybit@menu.com"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </LabelInputContainer>
         <LabelInputContainer className="mb-4">
           <Label htmlFor="password">Password</Label>
-          <Input id="password" placeholder="••••••••" type="password" />
+
+          <Input
+            id="password"
+            placeholder="••••••••"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </LabelInputContainer>
 
         <button
-          // onSubmit={handleSubmit}
           className="group/btn relative block h-10 w-full mt-8 rounded-md bg-white font-medium text-black shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset]"
           type="submit"
         >
@@ -76,6 +110,13 @@ export default function SignupForm() {
           <span className="text-sm text-black">Signup with Google</span>
           <BottomGradient />
         </button>
+      </div>
+      <div className="flex items-center justify-center mt-4">
+        <Link href="/Login">
+          <span className="text-md font-medium text-white hover:text-black underline hover:underline-offset-2 transition duration-200">
+            Already have an account?
+          </span>
+        </Link>
       </div>
     </div>
   );

@@ -21,10 +21,14 @@ import {
   addNewCategory,
   addNewProduct,
   deleteCategory,
+  deleteItemById,
   getCategories,
   getMyQr,
+  getProducts,
   getPublished,
   getQrMenu,
+  updateCategory,
+  updateItem,
 } from "../utils/api";
 import AddCategoryModal from "../components/Modals/categorymodal";
 import AddProductModal from "../components/Modals/addProductModal";
@@ -102,6 +106,16 @@ const Profile = () => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const router = useRouter();
   const [isModalOpen, setModalOpen] = useState(false);
+  const [editingCategoryId, setEditingCategoryId] = useState(null);
+  const [editedCategoryName, setEditedCategoryName] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [searchProduct, setSearchProduct] = useState("");
+  const [editingItemId, setEditingItemId] = useState(null);
+  const [editedItemData, setEditedItemData] = useState({
+    name: "",
+    price: "",
+    description: "",
+  });
 
   const fetchCategories = async () => {
     try {
@@ -115,6 +129,20 @@ const Profile = () => {
   const filteredCategories = categories.filter((cat) =>
     cat.name.toLowerCase().includes(searchQuery)
   );
+
+  // const fetchProducts = async () => {
+  //   try {
+  //     const response = await getProducts(qrDetails.business_id);
+
+  //     const products = response.data.data[0]?.Items || [];
+
+  //     console.log(products);
+
+  //     setProducts(products);
+  //   } catch (error) {
+  //     console.error("Failed to fetch products", error);
+  //   }
+  // };
 
   const addCategory = async (categoryName) => {
     try {
@@ -142,8 +170,7 @@ const Profile = () => {
       };
 
       await addNewProduct(payload);
-      await fetchProducts();
-      setProductModalOpen(false);
+      await fetchCategories();
     } catch (error) {
       console.error("Failed to add product", error);
     }
@@ -155,6 +182,42 @@ const Profile = () => {
       await fetchCategories();
     } catch (error) {
       console.error("Failed to delete category", error);
+    }
+  };
+
+  const editCategory = async (categoryId, newName) => {
+    try {
+      const payload = {
+        name: newName,
+        business_id: qrDetails.business_id,
+      };
+
+      await updateCategory(categoryId, payload);
+      await fetchCategories();
+      setEditingCategoryId(null);
+      setEditedCategoryName("");
+    } catch (error) {
+      console.error("Failed to edit category", error);
+    }
+  };
+
+  const saveEditedItem = async (itemId, updatedData) => {
+    try {
+      await updateItem(itemId, updatedData);
+      await fetchCategories();
+      setEditingItemId(null);
+      setEditedItemData({ name: "", price: "", description: "" });
+    } catch (error) {
+      console.error("Failed to update item", error);
+    }
+  };
+
+  const deleteItem = async (itemId) => {
+    try {
+      await deleteItemById(itemId);
+      await fetchCategories();
+    } catch (error) {
+      console.error("Failed to delete item", error);
     }
   };
 
@@ -220,7 +283,7 @@ const Profile = () => {
       localStorage.removeItem("token");
       sessionStorage.clear();
       setShowLogoutModal(false);
-      router.push("/Login");
+      router.push("/");
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -389,24 +452,71 @@ const Profile = () => {
                     </thead>
                     <tbody>
                       {filteredCategories.map((category) => (
-                        <tr key={category.id} className=" hover:bg-gray-50">
+                        <tr key={category.id} className="hover:bg-gray-50">
                           <td className="p-4 flex items-center gap-2">
-                            <span className="text-md font-semibold">
-                              {category.name}
-                            </span>
+                            {editingCategoryId === category.id ? (
+                              <input
+                                type="text"
+                                value={editedCategoryName}
+                                onChange={(e) =>
+                                  setEditedCategoryName(e.target.value)
+                                }
+                                className="border rounded px-2 py-1 text-sm"
+                              />
+                            ) : (
+                              <span className="text-md font-semibold">
+                                {category.name}
+                              </span>
+                            )}
                           </td>
                           <td className="p-4">
                             <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
                               Active
                             </span>
                           </td>
-                          <td className="p-4">
-                            <span
-                              onClick={() => handleDelete(category.id)}
-                              className="bg-red-100 cursor-pointer text-red-700 text-xs px-2 py-1 rounded-full"
-                            >
-                              Delete
-                            </span>
+                          <td className="p-4 flex items-center gap-6">
+                            {editingCategoryId === category.id ? (
+                              <>
+                                <span
+                                  onClick={() =>
+                                    editCategory(
+                                      category.id,
+                                      editedCategoryName
+                                    )
+                                  }
+                                  className="bg-blue-600 text-white text-xs px-3 py-1 rounded-full cursor-pointer"
+                                >
+                                  Save
+                                </span>
+                                <span
+                                  onClick={() => {
+                                    setEditingCategoryId(null);
+                                    setEditedCategoryName("");
+                                  }}
+                                  className="bg-gray-300 text-xs px-3 py-1 rounded-full cursor-pointer"
+                                >
+                                  Cancel
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                <span
+                                  onClick={() => handleDelete(category.id)}
+                                  className="bg-red-100 cursor-pointer text-red-700 text-xs px-2 py-1 rounded-full"
+                                >
+                                  Delete
+                                </span>
+                                <span
+                                  onClick={() => {
+                                    setEditingCategoryId(category.id);
+                                    setEditedCategoryName(category.name);
+                                  }}
+                                  className="bg-blue-100 cursor-pointer text-blue-700 text-xs px-2 py-1 rounded-full"
+                                >
+                                  Edit
+                                </span>
+                              </>
+                            )}
                           </td>
                         </tr>
                       ))}
@@ -455,7 +565,11 @@ const Profile = () => {
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-                  <select className="border text-sm px-3 py-2 rounded-md">
+                  <select
+                    className="border text-sm px-3 py-2 rounded-md"
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                  >
                     <option value="">All categories</option>
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.name}>
@@ -463,10 +577,15 @@ const Profile = () => {
                       </option>
                     ))}
                   </select>
+
                   <input
                     type="text"
                     placeholder="Search"
+                    value={searchProduct}
                     className="border px-3 py-2 rounded-md text-sm flex-1 w-full"
+                    onChange={(e) =>
+                      setSearchProduct(e.target.value.toLowerCase())
+                    }
                   />
                 </div>
 
@@ -474,36 +593,132 @@ const Profile = () => {
                   <table className="min-w-full text-sm">
                     <thead>
                       <tr className="text-left border-b border-[#6220fb] bg-gray-50 text-gray-600">
-                        <th className="p-4">
-                          <input type="checkbox" />
-                        </th>
                         <th className="p-4">Products</th>
+                        <th className="p-4">Description</th>
                         <th className="p-4">Status</th>
+                        <th className="p-4">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {categories.map((category) =>
-                        category.Items?.map((item) => (
-                          <tr key={item.id} className="hover:bg-gray-50">
-                            <td className="p-4">
-                              <input type="checkbox" />
-                            </td>
-                            <td className="p-4 flex items-center gap-3">
-                              <div>
-                                <div className="font-medium">{item.name}</div>
-                                <div className="text-xs text-gray-500">
-                                  ₹ {item.price}
+                      {categories
+                        .filter(
+                          (cat) =>
+                            selectedCategory === "" ||
+                            cat.name === selectedCategory
+                        )
+                        .map((category) =>
+                          category.Items?.filter((item) =>
+                            item.name
+                              .toLowerCase()
+                              .includes(searchProduct.toLowerCase())
+                          ).map((item) => (
+                            <tr key={item.id} className="hover:bg-gray-50">
+                              <td className="p-4 flex items-center gap-3">
+                                <div>
+                                  <div className="font-medium">{item.name}</div>
+                                  <div className="text-xs text-gray-500">
+                                    ₹ {item.price}
+                                  </div>
                                 </div>
-                              </div>
-                            </td>
-                            <td className="p-4">
-                              <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
-                                Active
-                              </span>
-                            </td>
-                          </tr>
-                        ))
-                      )}
+                              </td>
+                              <td className="p-4">
+                                <div className="text-sm text-gray-600">
+                                  {item.description}
+                                </div>
+                              </td>
+                              <td className="p-4">
+                                <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
+                                  Active
+                                </span>
+                              </td>
+                              <td className="p-4 flex flex-col gap-2 md:flex-row md:items-center md:gap-6">
+                                {editingItemId === item.id ? (
+                                  <div className="flex flex-col md:flex-row gap-2 items-start md:items-center">
+                                    <input
+                                      type="text"
+                                      value={editedItemData.name}
+                                      onChange={(e) =>
+                                        setEditedItemData({
+                                          ...editedItemData,
+                                          name: e.target.value,
+                                        })
+                                      }
+                                      placeholder="Name"
+                                      className="border px-2 py-1 rounded text-sm"
+                                    />
+                                    <input
+                                      type="number"
+                                      value={editedItemData.price}
+                                      onChange={(e) =>
+                                        setEditedItemData({
+                                          ...editedItemData,
+                                          price: e.target.value,
+                                        })
+                                      }
+                                      placeholder="Price"
+                                      className="border px-2 py-1 rounded text-sm"
+                                    />
+                                    <input
+                                      type="text"
+                                      value={editedItemData.description}
+                                      onChange={(e) =>
+                                        setEditedItemData({
+                                          ...editedItemData,
+                                          description: e.target.value,
+                                        })
+                                      }
+                                      placeholder="Description"
+                                      className="border px-2 py-1 rounded text-sm"
+                                    />
+                                    <span
+                                      onClick={() =>
+                                        saveEditedItem(item.id, editedItemData)
+                                      }
+                                      className="bg-blue-600 text-white text-xs px-3 py-1 rounded-full cursor-pointer"
+                                    >
+                                      Save
+                                    </span>
+                                    <span
+                                      onClick={() => {
+                                        setEditingItemId(null);
+                                        setEditedItemData({
+                                          name: "",
+                                          price: "",
+                                          description: "",
+                                        });
+                                      }}
+                                      className="bg-gray-300 text-xs px-3 py-1 rounded-full cursor-pointer"
+                                    >
+                                      Cancel
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <div className="flex gap-4">
+                                    <span
+                                      onClick={() => deleteItem(item.id)}
+                                      className="bg-red-100 cursor-pointer text-red-700 text-xs px-2 py-1 rounded-full"
+                                    >
+                                      Delete
+                                    </span>
+                                    <span
+                                      onClick={() => {
+                                        setEditingItemId(item.id);
+                                        setEditedItemData({
+                                          name: item.name,
+                                          price: item.price,
+                                          description: item.description,
+                                        });
+                                      }}
+                                      className="bg-blue-100 cursor-pointer text-blue-700 text-xs px-2 py-1 rounded-full"
+                                    >
+                                      Edit
+                                    </span>
+                                  </div>
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        )}
                     </tbody>
                   </table>
                 </div>

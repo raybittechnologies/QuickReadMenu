@@ -41,6 +41,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+BusinessRouter.get("/qr/:slug", getMenuOnSlug);
 BusinessRouter.use(protect);
 
 BusinessRouter.route("/")
@@ -66,7 +67,6 @@ BusinessRouter.route("business/:id")
 
 BusinessRouter.route("/menu/:id").get(getMenu);
 BusinessRouter.get("/getMyQr", getMyQr);
-BusinessRouter.get("/qr/:slug", getMenuOnSlug);
 BusinessRouter.get("/publish/:id", published);
 
 module.exports = BusinessRouter;

@@ -180,10 +180,11 @@ exports.getMyQr = catchAsync(async (req, res, next) => {
 
 exports.getMenuOnSlug = catchAsync(async (req, res, next) => {
   const slug = `/${req.params.slug}`;
+  console.log(slug);
 
   const myQrMenu = await Slugs.findOne({
     where: { slug },
-    attributes: [],
+    attributes: ["slug", "business_id"],
     include: [
       {
         model: Business,
@@ -203,6 +204,7 @@ exports.getMenuOnSlug = catchAsync(async (req, res, next) => {
       },
     ],
   });
+  console.log(myQrMenu);
 
   if (!myQrMenu) {
     return res.status(404).json({ message: "Menu not found" });

@@ -62,7 +62,7 @@ const QRMenuView = () => {
     getQrMenu(menuView).then(
       ({ data }) => {
         setMenu(data.business);
-
+        console.log(data.business);
         setError(null);
       },
       (err) => {

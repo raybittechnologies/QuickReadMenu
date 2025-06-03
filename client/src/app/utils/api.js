@@ -49,12 +49,16 @@ export const addNewCategory = async (data) => {
   });
 };
 
+export const updateCategory = async (categoryId, data) => {
+  return await axios.patch(`${BASE_URI}/categories/${categoryId}`, data);
+};
+
 export const addNewProduct = async (data) => {
   const token = localStorage.getItem("token");
 
   return await api.post(`${BASE_URI}/items`, data, {
     headers: {
-      "Content-Type": "multipart/form-data",
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
   });
@@ -80,6 +84,15 @@ export const getMyQr = async () => {
   });
 };
 
+export const getProducts = async (id) => {
+  const token = localStorage.getItem("token");
+  return await api.get(`${BASE_URI}/items/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const getPublished = async (id) => {
   const token = localStorage.getItem("token");
   return await api.get(`${BASE_URI}/businesses/publish/${id}`, {
@@ -87,4 +100,12 @@ export const getPublished = async (id) => {
       Authorization: `Bearer ${token}`,
     },
   });
+};
+
+export const updateItem = (itemId, updatedData) => {
+  return axios.patch(`${BASE_URI}/items/${itemId}`, updatedData);
+};
+
+export const deleteItemById = (itemId) => {
+  return axios.delete(`${BASE_URI}/items/${itemId}`);
 };

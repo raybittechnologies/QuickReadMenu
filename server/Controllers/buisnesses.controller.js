@@ -103,7 +103,7 @@ exports.getBusinessById = catchAsync(async (req, res, next) => {
 });
 
 exports.getMyBusiness = catchAsync(async (req, res, next) => {
-  const single = await Business.findOne({ where: { user_id: req.user.id } });
+  const single = await Business.findAll({ where: { user_id: req.user.id } });
   if (!single) {
     return res
       .status(404)

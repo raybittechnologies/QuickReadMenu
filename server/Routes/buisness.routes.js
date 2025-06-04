@@ -11,6 +11,7 @@ const {
   getMyQr,
   getMenuOnSlug,
   published,
+  getMyBusiness,
 } = require("../Controllers/buisnesses.controller");
 const { protect } = require("../Controllers/auth.controller");
 
@@ -68,5 +69,6 @@ BusinessRouter.route("business/:id")
 BusinessRouter.route("/menu/:id").get(getMenu);
 BusinessRouter.get("/getMyQr", getMyQr);
 BusinessRouter.get("/publish/:id", published);
+BusinessRouter.get("/myBuisnesses", getMyBusiness);
 
 module.exports = BusinessRouter;

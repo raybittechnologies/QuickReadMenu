@@ -109,3 +109,12 @@ export const updateItem = (itemId, updatedData) => {
 export const deleteItemById = (itemId) => {
   return axios.delete(`${BASE_URI}/items/${itemId}`);
 };
+
+export const getMyBusiness = () => {
+  const token = localStorage.getItem("token");
+  return axios.get(`${BASE_URI}/businesses/myBuisnesses`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

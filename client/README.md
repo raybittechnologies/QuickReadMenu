@@ -1,36 +1,125 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# QR Menu Web App 🍽️
 
-## Getting Started
+A full-stack QR Menu web application built with **Next.js 14 (App Router)**, **Tailwind CSS**, **Node.js**, and **Express**. This solution is designed to help restaurant owners and small businesses create, manage, and share their digital menu using QR codes with multilingual support, beautiful UI, and real-time customization.
 
-First, run the development server:
+---
+
+## 🌐 Features
+
+### ✅ Client-Side (Next.js)
+
+- Built with **Next.js App Router** and **Server Actions**
+- Responsive UI using **Tailwind CSS**
+- Multi-step form for creating business menus
+- Upload business logo and banner
+- Search for businesses using **Google Maps Places API**
+- Real-time preview of business menu
+- Dynamic QR code generation for each business
+- Redux for state management
+- Auto-fill address from selected location
+- Dark/light theme readiness
+- Optimized images using `next/image`
+
+### 🔒 Server-Side (Node.js + Express)
+
+- User authentication with JWT
+- Create, read, update, and delete businesses
+- Secure file uploads for banners and logos
+- MongoDB or PostgreSQL integration for storing business data
+- QR code image generation via external library
+- REST API with full CRUD support
+- Hosted on `localhost:5050` (in development)
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js >= 18.x
+- npm or yarn
+- MongoDB/PostgreSQL instance (cloud/local)
+- Google Maps Places API Key
+
+---
+
+### 🔧 Project Structure
+
+qr-menu/
+├── app/ # Next.js App Router directory
+│ ├── page.js # Landing page
+│ ├── dashboard/ # Business dashboard
+│ ├── getStarted/ # Onboarding and setup flow
+│ ├── UserProfile/ # Business profile view
+│ └── utils/ # Constants and API helper
+├── components/ # Reusable UI components (Button, Navbar, etc.)
+├── public/ # Static assets like logo, favicon
+├── server/ # Express server handling API routes
+│ ├── routes/ # API endpoints (auth, business, upload)
+│ └── controllers/ # Controller logic for APIs
+├── styles/ # Tailwind CSS and global styles
+├── README.md
+├── next.config.js # Next.js config with image domain settings
+├── .env.local # Environment variables
+└── package.json
+
+---
+
+### 🧠 Key Technologies
+
+- **Frontend**: Next.js, Tailwind CSS, Redux, Next Image
+- **Backend**: Node.js, Express, JWT, Multer (for uploads), QRCode package
+- **Database**: MongoDB or PostgreSQL
+- **API**: Google Places API for business lookup
+- **QR Generator**: Node QR Code generator
+- **Deployment Ready**: Easily deployable on Vercel (frontend) and Render/Heroku (backend)
+
+---
+
+### 🛠️ Local Development
+
+#### 1. Clone the repository
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/yourusername/qr-menu.git
+cd qr-menu
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+# For frontend
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+cd client
+npm install
 
-## Learn More
+# For backend
 
-To learn more about Next.js, take a look at the following resources:
+cd ../server
+npm install
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. Configure environment
+   Create .env.local and .env files in client/ and server/ folders respectively:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Client: .env.local
+NEXT_PUBLIC_BASE_URI=http://localhost:5050
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_api_key
 
-## Deploy on Vercel
+Server: .env
+PORT=5050
+MONGO_URI=your_mongodb_connection
+JWT_SECRET=your_jwt_secret
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. Start development
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Start frontend
+
+cd client
+npm run dev
+
+# Start backend
+
+cd ../server
+npm run dev
+
+📄 License
+MIT License © [Raybit technologies]

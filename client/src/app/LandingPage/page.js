@@ -2,6 +2,7 @@
 import Link from "next/link";
 import Button from "../components/Button/page";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 const fadeIn = (direction = "up", delay = 0) => {
   return {
@@ -264,14 +265,14 @@ export default function LandingPage() {
               <h4 className="font-semibold mb-2">Discover</h4>
               <ul className="space-y-1">
                 <li>
-                  <a href="#" className="hover:underline">
+                  <Link href="#" className="hover:underline">
                     Menu pricing
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:underline">
+                  <Link href="#" className="hover:underline">
                     My Menus
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -281,19 +282,19 @@ export default function LandingPage() {
               <h4 className="font-semibold mb-2">Company</h4>
               <ul className="space-y-1">
                 <li>
-                  <a href="/signup" className="hover:underline">
+                  <Link href="/signup" className="hover:underline">
                     Signup
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="/UserProfile" className="hover:underline">
+                  <Link href="/dashboard" className="hover:underline">
                     Web Agency
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:underline">
+                  <Link href="#" className="hover:underline">
                     Website Builder
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -303,14 +304,14 @@ export default function LandingPage() {
               <h4 className="font-semibold mb-2">Policies</h4>
               <ul className="space-y-1">
                 <li>
-                  <a href="#" className="hover:underline">
+                  <Link href="#" className="hover:underline">
                     Terms Of Use
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:underline">
+                  <Link href="#" className="hover:underline">
                     Privacy Policy
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -321,17 +322,18 @@ export default function LandingPage() {
               <p className="mb-2">+1(213) 550-3317</p>
               <div className="flex space-x-2">
                 {["facebook", "instagram", "youtube"].map((platform) => (
-                  <a
+                  <Link
                     key={platform}
                     href="#"
                     className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200 transition"
                   >
-                    <img
+                    <Image
                       src={`/icons/${platform}.svg`}
                       alt={`${platform} icon`}
-                      className="w-4 h-4"
+                      height={4}
+                      width={4}
                     />
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>
